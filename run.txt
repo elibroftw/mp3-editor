@@ -1,0 +1,4 @@
+python
+import main, album_art_updater
+add_simple_meta("")
+add_mp3_cover("")
