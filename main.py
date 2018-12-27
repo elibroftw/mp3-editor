@@ -7,7 +7,8 @@ from glob import glob
 
 
 def copy(text: str):
-    command = 'echo ' + text.strip() + '| clip'
+    command = f'echo|set/p={text}|clip'
+    # command = 'echo ' + text.strip() + '| clip'  # this added a new line character
     system(command)
 
 
@@ -43,7 +44,7 @@ def individual_select(filename):
                 set_artist(audio, input('Enter artist: '))
                 print('Artist set')
             elif sub_menu_user_choice == 5:
-                set_artist(audio, input('Enter artists (comma seperated eg. "Elijah, Lopez"): ').split(', '))
+                set_artist(audio, input('Enter artists (comma separated eg. "Elijah, Lopez"): ').split(', '))
                 print('Artists set')
             elif sub_menu_user_choice == 6:
                 set_album(audio, input('Enter album: '))
@@ -54,7 +55,7 @@ def individual_select(filename):
                 print('1. Auto')
                 print('2. Url')
                 print('3. Local Image')
-                print('4, Manual')
+                print('4. Manual')
                 print('5. Exit')
                 try:
                     album_art_choice = int(input('Enter an option: '))
@@ -158,12 +159,10 @@ def main():
             try:
                 results = get_album_art(search_artist, search_title, return_all=True)
                 for i, result in enumerate(results): print(f'{i + 1}. {result}')
-                print('Enter a valid integer to open the respective url in your browser'
-                      '(Also copies url to browser).\n'
+                print('Enter a valid integer to copy the respective url to your clipboard'
                       'Entering anything else will let you go back to the main menu')
                 try:
                     url = results[int(input()) - 1]
-                    webbrowser.open(url)
                     copy(url)
                     print('Copied url to clipboard!')
                 except (ValueError, IndexError):
