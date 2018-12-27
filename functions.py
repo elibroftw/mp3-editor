@@ -18,10 +18,17 @@ with open('config.txt') as f:
     for line in f.read().splitlines():
         space_index = line.index(' ')  # the file is formatted: VARIABLE = KEY
         varValue = line[space_index + 3:]
-        try: varValue = int(varValue)
-        except ValueError:
-            try: varValue = float(varValue)
-            except ValueError: pass
+        if varValue.isdigit():
+            varValue = int(varValue)
+        else:
+            varValue = float(varValue) if varValue.replace('.', '', 1).isdigit() else varValue
+        # try:
+        #     varValue = int(varValue)
+        # except ValueError:
+        #     try:
+        #         varValue = float(varValue)
+        #     except ValueError:
+        #         pass
         config[line[:space_index]] = varValue
 
 # set the spotify auth str (needs to be base64 encoded)
@@ -222,9 +229,8 @@ def get_album_art(artist: str, title: str, access_token='', select_index=0, retu
         access_token = access_token_response.json()['access_token']
     header = {'Authorization': 'Bearer ' + access_token}
     r = requests.get(f'https://api.spotify.com/v1/search?q={title}+artist:{artist}&type=track', headers=header)
-    if return_all:
-        results = [item['album']['images'][0]['url'] for item in r.json()['tracks']['items']]
-        return results
+
+    if return_all: return [item['album']['images'][0]['url'] for item in r.json()['tracks']['items']]
     return r.json()['tracks']['items'][select_index]['album']['images'][0]['url']
 
 
@@ -242,7 +248,8 @@ def set_album_cover(file_path: str, img_path='', url='', title='', artist='', se
             print(f'Album art not found for: {file}')
             return False
     elif not img_path and not url:
-        if 'title' in audio: title = audio['title']
+        if 'title' in audio:
+            title = audio['title']
         else:
             add_simple_meta(file_path)
             title = file[file.index('-') + 2:-4]
