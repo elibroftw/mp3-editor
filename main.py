@@ -1,4 +1,3 @@
-import webbrowser
 from os import chdir, system, rename, path
 from tkinter import filedialog
 from tqdm import tqdm
