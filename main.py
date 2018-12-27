@@ -1,3 +1,4 @@
+import platform
 from os import chdir, system, rename, path
 from tkinter import filedialog
 from tqdm import tqdm
@@ -6,9 +7,12 @@ from glob import glob
 
 
 def copy(text: str):
-    command = f'echo|set/p={text}|clip'
-    # command = 'echo ' + text.strip() + '| clip'  # this added a new line character
-    system(command)
+    if platform.system() == 'Windows':
+        command = f'echo|set/p={text}|clip'
+        # command = 'echo ' + text.strip() + '| clip'  # this added a new line character
+        system(command)
+        return True
+    return False
 
 
 def individual_select(filename):
@@ -84,7 +88,7 @@ def individual_select(filename):
                 # set_date(audio, input('Enter data (MM/DD/YYYY):)
                 pass
             elif sub_menu_user_choice == 11:  # TODO: Rename file
-                print('Enter new file name (with extention)')
+                print('Enter new file name (with extension)')
                 new_filename = path.dirname(filename) + '/' + input()
                 if not new_filename.count('.mp3'): new_filename += '.mp3'
                 rename(filename, new_filename)
@@ -118,7 +122,7 @@ def main():
             print(f'1. Change Directory (currently: {music_directory})')
             print('2. Set metadata for tracks with missing covers (No override)')
             print('3. Set album covers for all tracks missing album art')
-            print('4. Select an indidual track')
+            print('4. Select an individual track')
             print('5. View mp3 files in directory (and then select)')
             print('6. Search for album covers')  # make menu better
             print('7. Exit')
@@ -136,7 +140,7 @@ def main():
                 add_simple_meta(file)
             print('Metadata for all tracks set')
         elif user_choice == 3:
-            for file in tqdm(glob.glob('*.mp3')):
+            for file in tqdm(glob('*.mp3')):
                 if not has_album_art(file):
                     add_simple_meta(file)
                     add_mp3_cover(file)
@@ -158,23 +162,18 @@ def main():
             try:
                 results = get_album_art(search_artist, search_title, return_all=True)
                 for i, result in enumerate(results): print(f'{i + 1}. {result}')
-                print('Enter a valid integer to copy the respective url to your clipboard'
+                print('Enter a valid integer to copy the respective url to your clipboard (Windows Only)'
                       'Entering anything else will let you go back to the main menu')
                 try:
                     url = results[int(input()) - 1]
-                    copy(url)
-                    print('Copied url to clipboard!')
-                except (ValueError, IndexError):
-                    pass
-
+                    if copy(url): print('Copied url to clipboard!')
+                except (ValueError, IndexError): pass
             except IndexError:
                 print('No results found :(')
-        elif user_choice == 7:
-            exit()
+        elif user_choice == 7: exit()
         else:
             output_intro = False
             print('Please enter an integer from 1 to 5')
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == '__main__': main()
