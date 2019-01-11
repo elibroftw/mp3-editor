@@ -1,0 +1,13 @@
+1. Set simple metadata (override=False)
+2. Set simple metadata (override=True)
+3. Set title
+4. Set artist
+5. Set artists
+6. Set album
+7. Set album artist
+8. Set album cover (auto, url, local image, from another file, manual)
+9. Set genre (not yet implemented)
+10. Set date (not yet implemented)
+11. Rename file
+12. Print properties
+13. Exit

@@ -1,9 +1,11 @@
 import platform
-from os import chdir, system, rename, path
+from os import chdir, system, rename, path, getcwd
 from tkinter import filedialog
 from tqdm import tqdm
 from functions import *
 from glob import glob
+
+starting_directory = getcwd()
 
 
 def copy(text: str):
@@ -16,20 +18,10 @@ def copy(text: str):
 
 
 def individual_select(filename):
+    with open(starting_directory+'/individual_select.txt') as f:
+        individual_select_menu_text = f.read()
     print('You selected:', filename)
-    print('1. Set simple metadata (override=False)')
-    print('2. Set simple metadata (override=True)')
-    print('3. Set title')
-    print('4. Set artist')
-    print('5. Set artists')
-    print('6. Set album')
-    print('7. Set album artist')
-    print('8. Set album cover (auto, url, local image, manual)')
-    print('9. Set genre (not yet implemented)')
-    print('10. Set date (not yet implemented)')
-    print('11. Rename file')
-    print('12. Print properties')
-    print('14. Exit')
+    print(individual_select_menu_text, end='')
     on_menu = True
     while on_menu:
         audio = EasyID3(filename)
@@ -58,8 +50,9 @@ def individual_select(filename):
                 print('1. Auto')
                 print('2. Url')
                 print('3. Local Image')
-                print('4. Manual')
-                print('5. Exit')
+                print('4. Another File')
+                print('5. Manual')
+                print('6. Exit')
                 try:
                     album_art_choice = int(input('Enter an option: '))
                     if album_art_choice == 1:
@@ -68,8 +61,10 @@ def individual_select(filename):
                     elif album_art_choice == 2:
                         set_album_cover(filename, url=input('Enter url: '))
                     elif album_art_choice == 3:
-                        set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album art'))
+                        set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album art', filetypes=[('Image', '*.jpg *.jpeg *.png')]))
                     elif album_art_choice == 4:
+                        set_album_cover(filename, copy_from=filedialog.askopenfilename(title='Select 2nd track', filetypes=[('Audio', '*.mp3')]))
+                    elif album_art_choice == 5:
                         search_title = input('Enter the title: ')
                         search_artist = input('Enter the artist: ')
                         try:
@@ -77,7 +72,7 @@ def individual_select(filename):
                             print('Album cover set')
                         except IndexError:
                             print('Album art not found')
-                    if album_art_choice in (1, 2, 3):
+                    if album_art_choice in (1, 2, 3, 4):
                         print('Album cover set')
                 except ValueError:
                     pass
@@ -98,12 +93,13 @@ def individual_select(filename):
                 for k, v in audio.items():
                     print(k, ':', v)
                 print('album cover :', has_album_art(filename))
-            elif sub_menu_user_choice == 14:
+            elif sub_menu_user_choice == 13:
                 on_menu = False
-            if 0 < sub_menu_user_choice < 14:
+            if 0 < sub_menu_user_choice < 13:
+                print(individual_select_menu_text)
                 print('Enter an option')
-            else: print('Please enter an integer from 1 to 7')
-        except ValueError: print('Please enter an integer from 1 to 7')
+            else: print('Please enter an integer from 1 to 13')
+        except ValueError: print('Please enter an integer from 1 to 13')
 
 
 def main():
@@ -145,7 +141,7 @@ def main():
                     add_simple_meta(file)
                     add_mp3_cover(file)
         elif user_choice == 4:
-            file = filedialog.askopenfilename(title='Select track')
+            file = filedialog.askopenfilename(title='Select track', filetypes=[('Audio', '*.mp3')])
             individual_select(file)
         elif user_choice == 5:
             files = glob('*.mp3')
@@ -170,10 +166,10 @@ def main():
                 except (ValueError, IndexError): pass
             except IndexError:
                 print('No results found :(')
-        elif user_choice == 7: exit()
+        elif user_choice == 7: return
         else:
             output_intro = False
-            print('Please enter an integer from 1 to 5')
+            print('Please enter an integer from 1 to 7')
 
 
 if __name__ == '__main__': main()

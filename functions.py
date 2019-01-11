@@ -234,12 +234,13 @@ def get_album_art(artist: str, title: str, access_token='', select_index=0, retu
     return r.json()['tracks']['items'][select_index]['album']['images'][0]['url']
 
 
-def set_album_cover(file_path: str, img_path='', url='', title='', artist='', select_index=0) -> bool:
+def set_album_cover(file_path: str, img_path='', url='', copy_from='', title='', artist='', select_index=0):
     audio = MP3(file_path, ID3=mutagen.id3.ID3)
     # with open('b.txt', 'w') as f:
     #     f.writelines(audio)
     file = pathlib.Path(file_path).name
-
+    try: audio.add_tags()
+    except mutagen.id3.error: pass
     if title and artist:
         try:
             img_path = get_album_art(artist, title)
@@ -278,19 +279,21 @@ def set_album_cover(file_path: str, img_path='', url='', title='', artist='', se
     elif img_path:
         with open(img_path, 'rb') as bits:  # better than open(albumart, 'rb').read() ?
             image_data = bits.read()
-    else:
+    elif url:
         url = url.replace(' ', '')
         image_data = urlopen(url).read()
         img_path = url
+    elif copy_from:
+         audio['APIC:'] = MP3(copy_from, ID3=mutagen.id3.ID3)['APIC:']
+         audio.save()
+         return
+
     if img_path.endswith('png'):
         mime = 'image/png'
     else:
         mime = 'image/jpeg'
     # image.desc = 'front cover'
-    try:
-        audio.add_tags()
-    except mutagen.id3.error:
-        pass
+    
     audio['APIC:'] = mutagen.id3.APIC(
         encoding=0,  # 3 is for utf-8
         mime=mime,  # image/jpeg or image/png
@@ -299,7 +302,7 @@ def set_album_cover(file_path: str, img_path='', url='', title='', artist='', se
         data=image_data
     )
     audio.save()
-    return True
+    return
 
 
 add_mp3_cover = add_album_cover = set_album_cover
