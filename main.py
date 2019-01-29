@@ -8,7 +8,7 @@ from glob import glob
 starting_directory = getcwd()
 
 
-def copy(text: str):
+def copy(text):
     if platform.system() == 'Windows':
         command = f'echo|set/p={text}|clip'
         # command = 'echo ' + text.strip() + '| clip'  # this added a new line character

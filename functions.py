@@ -81,7 +81,7 @@ def set_album_artist(audio: EasyID3, album_artist):
     audio.save()
 
 
-def add_simple_meta(mp3_path: str, artist='', title='', album='', albumartist='', override=False):
+def add_simple_meta(mp3_path, artist='', title='', album='', albumartist='', override=False):
     """
     Automatically sets the metadata for an mp3 file
     :param mp3_path: the path to the mp3 file
@@ -186,13 +186,13 @@ def add_simple_meta(mp3_path: str, artist='', title='', album='', albumartist=''
 set_simple_meta = add_simple_meta
 
 
-def has_album_art(file_path: str) -> bool:
+def has_album_art(mp3_path) -> bool:
     """
-    Checks if the file has an album coover
-    :param file_path:
+    Checks if the file at mp3_path has an album coover
+    :param mp3_path:
     :return:
     """
-    audio: File = File(file_path)
+    audio: File = File(mp3_path)
     try:
         if 'APIC:' in audio:
             apic: mutagen.id3.APIC = audio['APIC:']
@@ -209,7 +209,7 @@ def has_album_art(file_path: str) -> bool:
 has_mp3_cover = has_album_cover = has_album_art
 
 
-def get_album_art(artist: str, title: str, access_token='', select_index=0, return_all=False):
+def get_album_art(artist, title, access_token='', select_index=0, return_all=False):
     """
     Fetches max resolution album art(s) for track (artist and title specified) using Spotify API
     :param artist: artist
@@ -234,11 +234,11 @@ def get_album_art(artist: str, title: str, access_token='', select_index=0, retu
     return r.json()['tracks']['items'][select_index]['album']['images'][0]['url']
 
 
-def set_album_cover(file_path: str, img_path='', url='', copy_from='', title='', artist='', select_index=0):
-    audio = MP3(file_path, ID3=mutagen.id3.ID3)
+def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artist='', select_index=0):
+    audio = MP3(mp3_path, ID3=mutagen.id3.ID3)
     # with open('b.txt', 'w') as f:
     #     f.writelines(audio)
-    file = pathlib.Path(file_path).name
+    file = pathlib.Path(mp3_path).name
     try: audio.add_tags()
     except mutagen.id3.error: pass
     if title and artist:
@@ -252,14 +252,14 @@ def set_album_cover(file_path: str, img_path='', url='', copy_from='', title='',
         if 'title' in audio:
             title = audio['title']
         else:
-            add_simple_meta(file_path)
+            add_simple_meta(mp3_path)
             title = file[file.index('-') + 2:-4]
         if 'artist' in audio:
             artist = audio['artist']
             if type(artist) == list:
                 artist = artist[0]
         else:
-            add_simple_meta(file_path)
+            add_simple_meta(mp3_path)
             artist = file[:file.index(' -')]
             if artist.count(', ') > 0:
                 artist = artist.split(', ')[0]
