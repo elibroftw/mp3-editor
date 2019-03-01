@@ -13,28 +13,30 @@ import pathlib
 # this dictionary store the api keys
 config = {}
 
-# load the api keys
-with open('config.txt') as f:
-    for line in f.read().splitlines():
-        space_index = line.index(' ')  # the file is formatted: VARIABLE = KEY
-        varValue = line[space_index + 3:]
-        if varValue.isdigit():
-            varValue = int(varValue)
-        else:
-            varValue = float(varValue) if varValue.replace('.', '', 1).isdigit() else varValue
-        # try:
-        #     varValue = int(varValue)
-        # except ValueError:
-        #     try:
-        #         varValue = float(varValue)
-        #     except ValueError:
-        #         pass
-        config[line[:space_index]] = varValue
+try:
+    # load the api keys
+    with open('config.txt') as f:
+        for line in f.read().splitlines():
+            space_index = line.index(' ')  # the file is formatted: VARIABLE = KEY
+            varValue = line[space_index + 3:]
+            if varValue.isdigit():
+                varValue = int(varValue)
+            else:
+                varValue = float(varValue) if varValue.replace('.', '', 1).isdigit() else varValue
+            # try:
+            #     varValue = int(varValue)
+            # except ValueError:
+            #     try:
+            #         varValue = float(varValue)
+            #     except ValueError:
+            #         pass
+            config[line[:space_index]] = varValue
 
-# set the spotify auth str (needs to be base64 encoded)
-SPOTIFY_AUTH_STR = f"{config['SPOTIFY_CLIENT_ID']}:{config['SPOTIFY_SECRET']}"
-SPOTIFY_B64_AUTH_STR = base64.urlsafe_b64encode(SPOTIFY_AUTH_STR.encode()).decode()
-
+    # set the spotify auth str (needs to be base64 encoded)
+    SPOTIFY_AUTH_STR = f"{config['SPOTIFY_CLIENT_ID']}:{config['SPOTIFY_SECRET']}"
+    SPOTIFY_B64_AUTH_STR = base64.urlsafe_b64encode(SPOTIFY_AUTH_STR.encode()).decode()
+except (FileNotFoundError, KeyError):
+    print('Limited functionality')
 
 # this is for future when I get a Soundcloud api key
 # SOUNDCLOUD_CLIENT_ID = config['SOUNDCLOUD_CLIENT_ID']

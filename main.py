@@ -103,13 +103,11 @@ def individual_select(filename):
 
 
 def main():
-    music_directory = config['MUSIC_LOCATION']
-
+    music_directory = config.get('MUSIC_LOCATION', '')
     if music_directory == '':
         music_directory = filedialog.askdirectory(title='Select Music Directory')
 
     chdir(music_directory)
-
     output_intro = True
 
     while True:
