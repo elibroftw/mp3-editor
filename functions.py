@@ -14,7 +14,7 @@ import pathlib
 config = {}
 
 try:
-    # load the api keys
+    # load the config values
     with open('config.txt') as f:
         for line in f.read().splitlines():
             space_index = line.index(' ')  # the file is formatted: VARIABLE = KEY
@@ -231,8 +231,6 @@ def get_album_art(artist, title, access_token='', select_index=0, return_all=Fal
 
 def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artist='', select_index=0):
     audio = MP3(mp3_path, ID3=mutagen.id3.ID3)
-    # with open('b.txt', 'w') as f:
-    #     f.writelines(audio)
     file = pathlib.Path(mp3_path).name
     try: audio.add_tags()
     except mutagen.id3.error: pass
