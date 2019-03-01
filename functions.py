@@ -23,13 +23,6 @@ try:
                 varValue = int(varValue)
             else:
                 varValue = float(varValue) if varValue.replace('.', '', 1).isdigit() else varValue
-            # try:
-            #     varValue = int(varValue)
-            # except ValueError:
-            #     try:
-            #         varValue = float(varValue)
-            #     except ValueError:
-            #         pass
             config[line[:space_index]] = varValue
 
     # set the spotify auth str (needs to be base64 encoded)
