@@ -2,7 +2,7 @@ import platform
 from os import chdir, system, rename, path, getcwd
 from tkinter import filedialog
 from tqdm import tqdm
-from functions import get_album_art, config, add_simple_meta, EasyID3, set_title, set_artist, set_album, set_album_artist, pathlib, set_album_cover
+from functions import *
 from glob import glob
 
 starting_directory = getcwd()
