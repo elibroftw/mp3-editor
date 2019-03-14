@@ -76,6 +76,65 @@ def set_album_artist(audio: EasyID3, album_artist):
     audio.save()
 
 
+def get_artist(filename):
+    artist = filename[:filename.index(' -')]
+
+    # Extraction of artist(s) name(s) from filename
+    # Different ways to name a file
+    # Lots of these are just-in-case situations
+    # The standard for naming multiple artists is comma sepearted values with a space after each comma
+    # Eg. path = "artist_1, artist_2, artist_3 - title.mp3"
+
+    # ,
+    if artist.count(' , '):
+        artist.split(' , ')
+    elif artist.count(', '):
+        artist = artist.split(', ')
+    elif artist.count(','):
+        artist = artist.split(',')
+
+    # vs
+    if artist.count(' vs. '):
+        artist = artist.split(' vs. ')
+    elif artist.count(' vs '):
+        artist = artist.split(' vs ')
+    elif artist.count(' vs.'):
+        artist = artist.split(' vs.')
+    elif artist.count(' vs'):
+        artist = artist.split(' vs')
+
+    # if artist.count(' & '):  # dimitri vegas & like mike are one artist so I can't use this statement
+    #     artist = artist.split(' & ')
+
+    # and
+    if artist.count(' and '):
+        artist = artist.split(' and ')
+    elif artist.count(' and'):
+        artist = artist.split(' and')
+
+    # ft
+    if artist.count(' ft '):
+        artist = artist.split(' ft ')
+    elif artist.count(' ft. '):
+        artist = artist.split(' ft. ')
+    elif artist.count(' ft.'):
+        artist = artist.split(' ft.')
+    elif artist.count(' ft'):
+        artist.split(' ft')
+
+    # feat
+    if artist.count(' feat '):
+        artist = artist.split(' feat ')
+    elif artist.count(' feat. '):
+        artist = artist.split(' feat. ')
+    elif artist.count(' feat.'):
+        artist = artist.split(' feat.')
+    elif artist.count(' feat'):
+        artist = artist.split(' feat')
+    
+    return artist
+
+
 def add_simple_meta(mp3_path, artist='', title='', album='', albumartist='', override=False):
     """
     Automatically sets the metadata for an mp3 file
@@ -84,67 +143,14 @@ def add_simple_meta(mp3_path, artist='', title='', album='', albumartist='', ove
     :param title: given title name
     :param album: given album name
     :param albumartist: given album artist
-    :param override: if True, files metadata is overriden
+    :param override: if True, files metadata is overridden
     :return: True or False
     """
     audio = EasyID3(mp3_path)
     filename = pathlib.Path(mp3_path).name  # or filename = mp3_path[:-4]
     try:
         if artist == '':
-            artist = filename[:filename.index(' -')]
-
-            # Extraction of artist(s) name(s) from filename
-            # Different ways to name a file
-            # Lots of these are just-in-case situations
-            # The standard for naming multiple artists is comma sepearted values with a space after each comma
-            # Eg. path = "artist_1, artist_2, artist_3 - title.mp3"
-
-            # ,
-            if artist.count(' , '):
-                artist.split(' , ')
-            elif artist.count(', '):
-                artist = artist.split(', ')
-            elif artist.count(','):
-                artist = artist.split(',')
-
-            # vs
-            if artist.count(' vs. '):
-                artist = artist.split(' vs. ')
-            elif artist.count(' vs '):
-                artist = artist.split(' vs ')
-            elif artist.count(' vs.'):
-                artist = artist.split(' vs.')
-            elif artist.count(' vs'):
-                artist = artist.split(' vs')
-
-            # if artist.count(' & '):  # dimitri vegas & like mike are one artist so I can't use this statement
-            #     artist = artist.split(' & ')
-
-            # and
-            if artist.count(' and '):
-                artist = artist.split(' and ')
-            elif artist.count(' and'):
-                artist = artist.split(' and')
-
-            # ft
-            if artist.count(' ft '):
-                artist = artist.split(' ft ')
-            elif artist.count(' ft. '):
-                artist = artist.split(' ft. ')
-            elif artist.count(' ft.'):
-                artist = artist.split(' ft.')
-            elif artist.count(' ft'):
-                artist.split(' ft')
-
-            # feat
-            if artist.count(' feat '):
-                artist = artist.split(' feat ')
-            elif artist.count(' feat. '):
-                artist = artist.split(' feat. ')
-            elif artist.count(' feat.'):
-                artist = artist.split(' feat.')
-            elif artist.count(' feat'):
-                artist = artist.split(' feat')
+            artist = get_artist(filename)
         else:
             if artist.count(' , '):
                 artist.split(' , ')
@@ -172,6 +178,8 @@ def add_simple_meta(mp3_path, artist='', title='', album='', albumartist='', ove
                 else:
                     audio['albumartist'] = albumartist
         audio.save()
+        if not has_album_art(mp3_path):
+            set_album_cover(mp3_path)
         return True
     except ValueError:
         print('Error with', filename)
@@ -231,7 +239,7 @@ def get_album_art(artist, title, access_token='', select_index=0, return_all=Fal
 
 def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artist='', select_index=0):
     audio = MP3(mp3_path, ID3=mutagen.id3.ID3)
-    file = pathlib.Path(mp3_path).name
+    filename = pathlib.Path(mp3_path).name
     try: audio.add_tags()
     except mutagen.id3.error: pass
     if title and artist:
@@ -239,36 +247,8 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
             img_path = get_album_art(artist, title)
             image_data = urlopen(img_path).read()
         except (KeyError, ValueError, IndexError):
-            print(f'Album art not found for: {file}')
+            print(f'Album art not found for: {filename}')
             return False
-    elif not img_path and not url:
-        if 'title' in audio:
-            title = audio['title']
-        else:
-            add_simple_meta(mp3_path)
-            title = file[file.index('-') + 2:-4]
-        if 'artist' in audio:
-            artist = audio['artist']
-            if type(artist) == list:
-                artist = artist[0]
-        else:
-            add_simple_meta(mp3_path)
-            artist = file[:file.index(' -')]
-            if artist.count(', ') > 0:
-                artist = artist.split(', ')[0]
-            elif artist.count(' vs') > 0:
-                artist = artist.split(' vs')[0]
-            elif artist.count(' &') > 0:
-                artist = artist.split(' &')[0]
-            elif artist.count(' ft') > 0:
-                artist = artist.split(' ft')[0]
-        try:
-            img_path = get_album_art(artist, title, select_index=select_index)
-            image_data = urlopen(img_path).read()
-        except (KeyError, ValueError, IndexError):
-            print(f'Album art not found for: {file}')
-            return False
-
     elif img_path:
         with open(img_path, 'rb') as bits:  # better than open(albumart, 'rb').read() ?
             image_data = bits.read()
@@ -277,9 +257,29 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
         image_data = urlopen(url).read()
         img_path = url
     elif copy_from:
-         audio['APIC:'] = MP3(copy_from, ID3=mutagen.id3.ID3)['APIC:']
-         audio.save()
-         return
+        audio['APIC:'] = MP3(copy_from, ID3=mutagen.id3.ID3)['APIC:']
+        audio.save()
+        return
+    else:
+        if 'title' in audio and not title:
+            title = audio['title']
+        else:
+            add_simple_meta(mp3_path)
+            title = filename[filename.index('-') + 2:-4]
+        if 'artist' in audio and not artist:
+            artist = audio['artist']
+            if type(artist) == list:
+                artist = artist[0]
+        else:
+            add_simple_meta(mp3_path)
+            artist = get_artist(filename)
+            
+        try:
+            img_path = get_album_art(artist, title, select_index=select_index)
+            image_data = urlopen(img_path).read()
+        except (KeyError, ValueError, IndexError):
+            print(f'Album art not found for: {filename}')
+            return False
 
     if img_path.endswith('png'):
         mime = 'image/png'
