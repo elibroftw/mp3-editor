@@ -11,3 +11,4 @@
 11. Rename file
 12. Print properties
 13. Exit
+14. Reprint Text

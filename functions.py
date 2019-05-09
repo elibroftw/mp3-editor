@@ -1,9 +1,10 @@
+import os
 from urllib import parse
-from mutagen.easyid3 import EasyID3
 import base64
 from urllib.request import urlopen
 import requests
 from mutagen import File
+from mutagen.easyid3 import EasyID3
 import mutagen.id3
 # noinspection PyProtectedMember
 from mutagen.id3 import Encoding
@@ -30,6 +31,7 @@ try:
     SPOTIFY_B64_AUTH_STR = base64.urlsafe_b64encode(SPOTIFY_AUTH_STR.encode()).decode()
 except (FileNotFoundError, KeyError):
     print('Limited functionality')
+
 
 # this is for future when I get a Soundcloud api key
 # SOUNDCLOUD_CLIENT_ID = config['SOUNDCLOUD_CLIENT_ID']
@@ -131,7 +133,7 @@ def get_artist(filename):
         artist = artist.split(' feat.')
     elif artist.count(' feat'):
         artist = artist.split(' feat')
-    
+
     return artist
 
 
@@ -240,8 +242,10 @@ def get_album_art(artist, title, access_token='', select_index=0, return_all=Fal
 def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artist='', select_index=0):
     audio = MP3(mp3_path, ID3=mutagen.id3.ID3)
     filename = pathlib.Path(mp3_path).name
-    try: audio.add_tags()
-    except mutagen.id3.error: pass
+    try:
+        audio.add_tags()
+    except mutagen.id3.error:
+        pass
     if title and artist:
         try:
             img_path = get_album_art(artist, title)
@@ -261,19 +265,17 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
         audio.save()
         return
     else:
-        if 'title' in audio and not title:
-            title = audio['title']
+        easy_audio = EasyID3(mp3_path)
+        if 'title' in easy_audio and not title:
+            title = easy_audio['title'][0]
         else:
             add_simple_meta(mp3_path)
             title = filename[filename.index('-') + 2:-4]
-        if 'artist' in audio and not artist:
-            artist = audio['artist']
-            if type(artist) == list:
-                artist = artist[0]
+        if 'artist' in easy_audio and not artist:
+            artist = easy_audio['artist'][0]
         else:
             add_simple_meta(mp3_path)
             artist = get_artist(filename)
-            
         try:
             img_path = get_album_art(artist, title, select_index=select_index)
             image_data = urlopen(img_path).read()
@@ -286,7 +288,7 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
     else:
         mime = 'image/jpeg'
     # image.desc = 'front cover'
-    
+
     audio['APIC:'] = mutagen.id3.APIC(
         encoding=0,  # 3 is for utf-8
         mime=mime,  # image/jpeg or image/png
@@ -300,7 +302,32 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
 
 add_mp3_cover = add_album_cover = set_album_cover
 
-# def trim(filename, start: float, end: float):  # TODO
-#     elapsed = end - start
-#     # ffmpeg -ss 10 -t 6 -i input.mp3 output.mp3
-#     return
+
+def trim(filename, start: int, end: int):
+    audio = EasyID3(filename)
+    artists = audio['artist']
+    title = audio['title']
+    album = audio['album']
+    album_artist = audio['albumartist']
+    album_cover = MP3(filename, ID3=mutagen.id3.ID3)['APIC:']
+    base = os.path.basename(filename)
+    base = f'TEMP {base}'
+    directory = os.path.dirname(filename)
+    temp_path = directory + '\\' + base
+    os.rename(filename, temp_path)
+    command = f'ffmpeg -i "{temp_path}" -ss {start} -t {end} -c copy "{filename}" > ffmpeg.log 2>&1'
+    os.system(command)
+    audio = EasyID3(filename)
+    audio['artist'] = artists
+    audio['title'] = title
+    audio['album'] = album
+    audio['albumartist'] = album_artist
+    audio.save()
+    audio = MP3(filename, ID3=mutagen.id3.ID3)
+    audio['APIC:'] = album_cover
+    audio.save()
+    os.remove(temp_path)
+
+
+if __name__ == '__main__':
+    trim(r"C:\Users\maste\Documents\MEGAsync\Music\Playboi Carti - Talk (ICYTWAT Remix).mp3", 0, 155)

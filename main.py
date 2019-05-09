@@ -23,7 +23,10 @@ def individual_select(filename):
     print(individual_select_menu_text, end='')
     on_menu = True
     while on_menu:
-        audio = EasyID3(filename)
+        try: audio = EasyID3(filename)
+        except mutagen.id3.ID3NoHeaderError:
+            audio = mutagen.File(filename, easy=True)
+            audio.add_tags()
         try:
             sub_menu_user_choice = int(input())
             if sub_menu_user_choice == 1:
@@ -56,7 +59,6 @@ def individual_select(filename):
                     album_art_choice = int(input('Enter an option: '))
                     if album_art_choice == 1:
                         set_simple_meta(filename)
-                        set_album_cover(filename)
                     elif album_art_choice == 2:
                         set_album_cover(filename, url=input('Enter url: '))
                     elif album_art_choice == 3:
@@ -94,8 +96,9 @@ def individual_select(filename):
                 print('album cover :', has_album_art(filename))
             elif sub_menu_user_choice == 13:
                 on_menu = False
-            if 0 < sub_menu_user_choice < 13:
+            else:
                 print(individual_select_menu_text)
+            if 0 < sub_menu_user_choice < 13:
                 print('Enter an option')
             else: print('Please enter an integer from 1 to 13')
         except ValueError: print('Please enter an integer from 1 to 13')

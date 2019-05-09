@@ -1,3 +1,4 @@
 config.txt
 .idea
 __pycache__
+ffmpeg.log
