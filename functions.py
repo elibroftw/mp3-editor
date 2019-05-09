@@ -328,6 +328,3 @@ def trim(filename, start: int, end: int):
     audio.save()
     os.remove(temp_path)
 
-
-if __name__ == '__main__':
-    trim(r"C:\Users\maste\Documents\MEGAsync\Music\Playboi Carti - Talk (ICYTWAT Remix).mp3", 0, 155)
