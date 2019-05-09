@@ -327,4 +327,3 @@ def trim(filename, start: int, end: int):
     audio['APIC:'] = album_cover
     audio.save()
     os.remove(temp_path)
-
