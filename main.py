@@ -95,10 +95,14 @@ def individual_select(filename):
                     print(k, ':', v)
                 print('album cover :', has_album_art(filename))
             elif sub_menu_user_choice == 13:
+                start = int(input('Enter start time (seconds): '))
+                end = int(input('Enter end time (seconds): '))
+                trim(filename, start, end)
+            elif sub_menu_user_choice == 14:
                 on_menu = False
             else:
                 print(individual_select_menu_text)
-            if 0 < sub_menu_user_choice < 13:
+            if 0 < sub_menu_user_choice < 14:
                 print('Enter an option')
             else: print('Please enter an integer from 1 to 13')
         except ValueError: print('Please enter an integer from 1 to 13')

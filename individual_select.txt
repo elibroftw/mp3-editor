@@ -10,5 +10,6 @@
 10. Set date (not yet implemented)
 11. Rename file
 12. Print properties
-13. Exit
-14. Reprint Text
+13. Trim audio
+14. Exit
+15. Reprint Text
