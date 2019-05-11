@@ -303,19 +303,25 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
 add_mp3_cover = add_album_cover = set_album_cover
 
 
-def trim(filename, start: int, end: int):
+# @memoize
+def get_temp_path(filename):
+    base = os.path.basename(filename)
+    base = f'TEMP {base}'
+    directory = os.path.dirname(filename)
+    temp_path = directory + '\\' + base
+    # os.rename(filename, temp_path)
+    return temp_path
+
+
+def ffmpeg_helper(filename, command):
     audio = EasyID3(filename)
     artists = audio['artist']
     title = audio['title']
     album = audio['album']
     album_artist = audio['albumartist']
     album_cover = MP3(filename, ID3=mutagen.id3.ID3)['APIC:']
-    base = os.path.basename(filename)
-    base = f'TEMP {base}'
-    directory = os.path.dirname(filename)
-    temp_path = directory + '\\' + base
+    temp_path = get_temp_path(filename)
     os.rename(filename, temp_path)
-    command = f'ffmpeg -i "{temp_path}" -ss {start} -t {end} -c copy "{filename}" > ffmpeg.log 2>&1'
     os.system(command)
     audio = EasyID3(filename)
     audio['artist'] = artists
@@ -327,3 +333,17 @@ def trim(filename, start: int, end: int):
     audio['APIC:'] = album_cover
     audio.save()
     os.remove(temp_path)
+
+
+def trim(filename, start: int, end: int):
+    temp_path = get_temp_path(filename)
+    command = f'ffmpeg -i "{temp_path}" -ss {start} -t {end} -c copy "{filename}" > ffmpeg.log 2>&1'
+    ffmpeg_helper(filename, command)
+
+
+def remove_silence(filename):
+    temp_path = get_temp_path(filename)
+    command = f'ffmpeg -i "{temp_path}" -af silenceremove=start_periods=1:stop_periods=1:detection=peak "{filename}" ' \
+              f'> ffmpeg.log 2>&1'
+    ffmpeg_helper(filename, command)
+
