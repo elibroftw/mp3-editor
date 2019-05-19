@@ -9,6 +9,7 @@ import mutagen.id3
 # noinspection PyProtectedMember
 from mutagen.id3 import Encoding
 from mutagen.mp3 import MP3
+from glob import glob
 import pathlib
 
 # this dictionary store the api keys

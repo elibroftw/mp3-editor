@@ -4,6 +4,7 @@ from tkinter import filedialog
 from tqdm import tqdm
 from functions import *
 from glob import glob
+import view_images
 
 starting_directory = getcwd()
 
@@ -115,7 +116,6 @@ def main():
 
     chdir(music_directory)
     output_intro = True
-
     while True:
         if output_intro:
             print('What would you like to do?')
@@ -159,17 +159,14 @@ def main():
         elif user_choice == 6:
             search_title = input('Enter the title: ')
             search_artist = input('Enter the artist: ')
-            try:
-                results = get_album_art(search_artist, search_title, return_all=True)
-                for i, result in enumerate(results): print(f'{i + 1}. {result}')
-                print('Enter a valid integer to copy the respective url to your clipboard (Windows Only)'
-                      'Entering anything else will let you go back to the main menu')
-                try:
-                    url = results[int(input()) - 1]
+            results = get_album_art(search_artist, search_title, return_all=True)
+            if results:
+                view_images.main(results)
+                url = os.environ.pop('SELECTED_URL', None)
+                if url:
                     if copy(url): print('Copied url to clipboard!')
-                except (ValueError, IndexError): pass
-            except IndexError:
-                print('No results found :(')
+                    else: print(url)
+            else: print('No results found :(')
         elif user_choice == 7: return
         else:
             output_intro = False
