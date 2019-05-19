@@ -11,12 +11,22 @@ import mutagen.id3
 # noinspection PyProtectedMember
 from mutagen.id3 import Encoding
 from mutagen.mp3 import MP3
+# noinspection PyUnresolvedReferences
 from glob import glob
 import pathlib
 
 # this dictionary store the api keys
 config = {}
 # TODO: don't change album cover if its already the album cover
+
+
+def copy(text):
+    if platform.system() == 'Windows':
+        command = f'echo|set/p={text}|clip'
+        system(command)
+        return True
+    return False
+
 
 try:
     # load the config values
@@ -352,9 +362,6 @@ def remove_silence(filename):
     ffmpeg_helper(filename, command)
 
 
-def copy(text):
-    if platform.system() == 'Windows':
-        command = f'echo|set/p={text}|clip'
-        system(command)
-        return True
-    return False
+if __name__ == '__main__':
+    # do not interface stuff here
+    pass
