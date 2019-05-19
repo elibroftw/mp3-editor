@@ -1,11 +1,14 @@
 from os import chdir, rename, path, getcwd
 from tkinter import filedialog
+import tkinter as tk
 from tqdm import tqdm
 from functions import *
 from glob import glob
 import image_selector
 
 starting_directory = getcwd()
+root = tk.Tk()
+# TODO: make into a gui
 
 
 def individual_select(filename):
@@ -55,8 +58,10 @@ def individual_select(filename):
                         set_album_cover(filename, url=input('Enter url: '))
                     elif album_art_choice == 3:
                         set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album art', filetypes=[('Image', '*.jpg *.jpeg *.png')]))
+                        root.destroy()
                     elif album_art_choice == 4:
                         set_album_cover(filename, copy_from=filedialog.askopenfilename(title='Select 2nd track', filetypes=[('Audio', '*.mp3')]))
+                        root.destroy()
                     elif album_art_choice == 5:
                         search_title = input('Enter the title: ')
                         search_artist = input('Enter the artist: ')
@@ -77,7 +82,7 @@ def individual_select(filename):
                 # set_genre(audio, input('Enter genre: '))
                 pass
             elif sub_menu_user_choice == 10:
-                # set_date(audio, input('Enter data (MM/DD/YYYY):)
+                # set_year(audio, input('Enter year (YYYY):)
                 pass
             elif sub_menu_user_choice == 11:  # TODO: Rename file
                 print('Enter new file name (with extension)')
@@ -106,9 +111,9 @@ def individual_select(filename):
 
 def main():
     music_directory = config.get('MUSIC_LOCATION', '')
-    if music_directory == '':
+    while music_directory == '' or not os.path.exists(music_directory):
         music_directory = filedialog.askdirectory(title='Select Music Directory')
-
+        root.destroy()
     chdir(music_directory)
     output_intro = True
     while True:
@@ -128,8 +133,10 @@ def main():
         output_intro = True
         if user_choice == 1:
             music_directory = filedialog.askdirectory(title='Select Music Directory')
-            chdir(music_directory)
-            print('Directory changed to', music_directory)
+            root.destroy()
+            if os.path.exists(music_directory):
+                chdir(music_directory)
+                print('Directory changed to', music_directory)
         elif user_choice == 2:
             for file in glob('*.mp3'):
                 add_simple_meta(file)
@@ -141,6 +148,7 @@ def main():
                     set_album_cover(file)
         elif user_choice == 4:
             file = filedialog.askopenfilename(title='Select track', filetypes=[('Audio', '*.mp3')])
+            root.destroy()
             individual_select(file)
         elif user_choice == 5:
             files = glob('*.mp3')

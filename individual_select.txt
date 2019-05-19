@@ -7,7 +7,7 @@
 7. Set album artist
 8. Set album cover (auto, url, local image, from another file, manual)
 9. Set genre (not yet implemented)
-10. Set date (not yet implemented)
+10. Set year (not yet implemented)
 11. Rename file
 12. Print properties
 13. Trim audio

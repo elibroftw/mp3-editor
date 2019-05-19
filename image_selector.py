@@ -43,7 +43,7 @@ def main(image_urls):
         return image
 
     label = tk.Label(root, image=load_image(0), background='#454545', borderwidth=1)
-    label.grid(row=1, column=2, sticky='w')
+    label.grid(row=1, column=2, sticky=tk.N)
 
     def prev_image():
         global current_image_index
