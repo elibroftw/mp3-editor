@@ -1,4 +1,6 @@
 import os
+import platform
+from os import system
 from urllib import parse
 import base64
 from urllib.request import urlopen
@@ -349,3 +351,10 @@ def remove_silence(filename):
               f'> ffmpeg.log 2>&1'
     ffmpeg_helper(filename, command)
 
+
+def copy(text):
+    if platform.system() == 'Windows':
+        command = f'echo|set/p={text}|clip'
+        system(command)
+        return True
+    return False

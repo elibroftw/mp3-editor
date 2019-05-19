@@ -1,5 +1,4 @@
-import platform
-from os import chdir, system, rename, path, getcwd
+from os import chdir, rename, path, getcwd
 from tkinter import filedialog
 from tqdm import tqdm
 from functions import *
@@ -7,14 +6,6 @@ from glob import glob
 import image_selector
 
 starting_directory = getcwd()
-
-
-def copy(text):
-    if platform.system() == 'Windows':
-        command = f'echo|set/p={text}|clip'
-        system(command)
-        return True
-    return False
 
 
 def individual_select(filename):
@@ -69,12 +60,15 @@ def individual_select(filename):
                     elif album_art_choice == 5:
                         search_title = input('Enter the title: ')
                         search_artist = input('Enter the artist: ')
-                        # TODO: use image_selector
-                        try:
-                            set_album_cover(filename, artist=search_artist, title=search_title)
-                            print('Album cover set')
-                        except IndexError:
-                            print('Album art not found')
+                        results = get_album_art(search_artist, search_title, return_all=True)
+                        if results:
+                            image_selector.main(results)
+                            url = os.environ.pop('SELECTED_URL', None)
+                            if url:
+                                set_album_cover(filename, url=url)
+                                print('Album cover set')
+                        else:
+                            print('No album art found :(')
                     if album_art_choice in (1, 2, 3, 4):
                         print('Album cover set')
                 except ValueError:
@@ -167,7 +161,7 @@ def main():
                 if url:
                     if copy(url): print('Copied url to clipboard!')
                     else: print(url)
-            else: print('No results found :(')
+            else: print('No album art found :(')
         elif user_choice == 7: return
         else:
             output_intro = False
