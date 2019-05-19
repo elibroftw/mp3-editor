@@ -4,7 +4,7 @@ from tkinter import filedialog
 from tqdm import tqdm
 from functions import *
 from glob import glob
-import view_images
+import image_selector
 
 starting_directory = getcwd()
 
@@ -69,6 +69,7 @@ def individual_select(filename):
                     elif album_art_choice == 5:
                         search_title = input('Enter the title: ')
                         search_artist = input('Enter the artist: ')
+                        # TODO: use image_selector
                         try:
                             set_album_cover(filename, artist=search_artist, title=search_title)
                             print('Album cover set')
@@ -161,7 +162,7 @@ def main():
             search_artist = input('Enter the artist: ')
             results = get_album_art(search_artist, search_title, return_all=True)
             if results:
-                view_images.main(results)
+                image_selector.main(results)
                 url = os.environ.pop('SELECTED_URL', None)
                 if url:
                     if copy(url): print('Copied url to clipboard!')
