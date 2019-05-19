@@ -14,6 +14,7 @@ import pathlib
 
 # this dictionary store the api keys
 config = {}
+# TODO: don't change album cover if its already the album cover
 
 try:
     # load the config values

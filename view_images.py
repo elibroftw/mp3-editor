@@ -1,5 +1,6 @@
 import io
 import tkinter as tk
+from tkinter.font import Font
 import urllib.request
 import os
 
@@ -39,7 +40,7 @@ def main(image_urls):
             images[0] = image
         return image
 
-    label = tk.Label(root, image=load_image(0))
+    label = tk.Label(root, image=load_image(0), background='#454545', borderwidth=1)
     label.grid(row=1, column=2, sticky='w')
 
     def prev_image():
@@ -59,13 +60,23 @@ def main(image_urls):
         if current_image_index >= len(images) - 1: current_image_index = 0
         label.configure(image=load_image(current_image_index))
 
-    # TODO: make it look nicer
+    # TODO: make the GUI look nicer
     # TODO: dark background
-    tk.Button(command=prev_image, text='Previous image', width=15).grid(row=2, column=1)
-    tk.Button(command=select_image, text='Select image', width=15).grid(row=2, column=2)
-    tk.Button(command=next_image, text='Next image', width=15).grid(row=2, column=3)
+    # TODO: next image on image click
+    # TODO: label or title bar stating number of images
+    # button_font = Font(family='Helvetica Neue', size=12)
+    button_font = Font(family='Verdana', size=11)
+    bg = '#0eabe0'
+    abg = '#68cbed'
+    # TODO: highlightbackground
+    label2 = tk.Label(root, text=f'{len(image_urls)} images', background='#454545', borderwidth=0, font=button_font, width=14)
+    label2.grid(row=1, column=1)
+    tk.Button(command=prev_image, text='Previous image', width=15, font=button_font, background=bg, activebackground=abg, borderwidth=0).grid(row=2, column=1)
+    tk.Button(command=select_image, text='Select', width=15, font=button_font, background=bg, activebackground=abg, borderwidth=0).grid(row=2, column=2)
+    tk.Button(command=next_image, text='Next image', width=15, font=button_font, background=bg, activebackground=abg, borderwidth=0).grid(row=2, column=3)
 
     root.wm_minsize(450, 300)
+    root.configure(background='#121212')
     root.resizable(False, False)
     center(root)
     root.mainloop()
