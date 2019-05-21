@@ -1,10 +1,17 @@
-from os import chdir, rename, path, getcwd
-from tkinter import filedialog
-import tkinter as tk
-from tqdm import tqdm
-from functions import *
-from glob import glob
-import image_selector
+try:
+    from glob import glob
+    from os import chdir, rename, path, getcwd
+    from tkinter import filedialog
+    import tkinter as tk
+
+    from tqdm import tqdm
+    
+    from functions import *
+    import image_selector
+except ImportError as e:
+    print(e)
+    input('Press Enter to exit....')
+    quit()
 
 starting_directory = getcwd()
 root = tk.Tk()

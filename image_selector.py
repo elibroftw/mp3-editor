@@ -1,11 +1,13 @@
 import io
+import os
 import tkinter as tk
 from tkinter.font import Font
 import urllib.request
-import os
-from functions import copy
+
 from win10toast import ToastNotifier
 from PIL import Image, ImageTk
+
+from functions import copy
 
 
 def center(top_level):

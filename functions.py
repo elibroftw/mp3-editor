@@ -1,20 +1,24 @@
-import os
-import platform
-from os import system
-from urllib import parse
-import base64
-from urllib.request import urlopen
-import requests
-from mutagen import File
-from mutagen.easyid3 import EasyID3
-import mutagen.id3
-# noinspection PyProtectedMember
-from mutagen.id3 import Encoding
-from mutagen.mp3 import MP3
-# noinspection PyUnresolvedReferences
-from glob import glob
-import pathlib
-
+try:
+    import base64
+    from glob import glob
+    import os
+    from os import system
+    import platform
+    import pathlib
+    from urllib import parse
+    from urllib.request import urlopen
+    
+    from mutagen import File
+    from mutagen.easyid3 import EasyID3
+    import mutagen.id3
+    from mutagen.id3 import Encoding
+    from mutagen.mp3 import MP3
+    import requests
+    
+except ImportError as e:
+    print(e)
+    print('Press Enter to quit...')
+    quit()
 # this dictionary store the api keys
 config = {}
 # TODO: don't change album cover if its already the album cover
@@ -363,5 +367,5 @@ def remove_silence(filename):
 
 
 if __name__ == '__main__':
-    # do not interface stuff here
+    # do non-interface stuff here
     pass
