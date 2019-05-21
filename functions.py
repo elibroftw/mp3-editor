@@ -351,7 +351,6 @@ def ffmpeg_helper(filename, command):
     temp_path = get_temp_path(filename)
     os.rename(filename, temp_path)
     os.system(command)
-    print('test')
     audio = EasyID3(filename)
     audio['artist'] = artists
     audio['title'] = title
