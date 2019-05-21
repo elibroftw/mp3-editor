@@ -7,13 +7,13 @@ My own mp3 editor made in python that can automatically set metadata and album c
 - Have ffmpeg installed to PATH.
 - Run main.py is for a command line interface (GUI for later)
 - All the useful functions are in functions.py (if you want to do everything with code)
-- Make sure to create a config.txt file to store your API keys and music directory.
+- Make sure to create a config.txt file to store your API keys and music directory. Will turn into .env later.
 - For the album cover feature, you need to have your own Spotify API.
 
 # Note
 This has been untested on Linux and Mac.
 
-Format of config.txt:
+# config.txt format
 
 MUSIC_LOCATION = path/no quotation marks/music directory
 
