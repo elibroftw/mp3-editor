@@ -21,7 +21,6 @@ def center(top_level):
     top_level.geometry("%dx%d+%d+%d" % (size + (x, y)))
 
 
-# https://stackoverflow.com/questions/38173526/displaying-images-from-url-in-tkinter#
 current_image_index = 0
 toaster = ToastNotifier()
 
