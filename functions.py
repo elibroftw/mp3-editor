@@ -1,8 +1,10 @@
 try:
     import base64
+    import shlex
     from glob import glob
     import os
     from os import system
+    import subprocess
     import platform
     import pathlib
     from urllib import parse
@@ -21,11 +23,14 @@ except ImportError as e:
     quit()
 
 # TDOD: just add ffmpeg binary to the repo
-if not os.system('ffmpeg'):
+p = subprocess.Popen('ffmpeg', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+out, err = p.communicate()
+ar = b"'ffmpeg' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n"
+if ar == err:
     print('FFMPEG NOT ON PATH')
     input('Press enter to go to FFMPEG website and how to add to path...')
     import webbrowser
-    webbrowser.open('http://example.com')
+    webbrowser.open('https://ffmpeg.org/download.html')
     webbrowser.open('http://blog.gregzaal.com/how-to-install-ffmpeg-on-windows/')
     quit()
 
