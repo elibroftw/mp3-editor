@@ -3,8 +3,10 @@ My own mp3 editor made in python that can automatically set metadata and album c
 
 
 # How to use
-main is just for a command line interface. All the useful functions are in functions.py
-make sure to create a config.txt file to store your API keys and music directory.
+`pip install -r requirements.txt`
+main.py is a command line interface.
+All the useful functions are in functions.py (if you want to do everything with code)
+Make sure to create a config.txt file to store your API keys and music directory.
 
 Format of config.txt:
 

@@ -1,0 +1,6 @@
+environs
+GitPython
+mutagen
+Pillow
+requests
+win10toast
