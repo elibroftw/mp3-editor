@@ -7,6 +7,10 @@ My own mp3 editor made in python that can automatically set metadata and album c
 main.py is a command line interface.
 All the useful functions are in functions.py (if you want to do everything with code)
 Make sure to create a config.txt file to store your API keys and music directory.
+Make sure ffmpeg is installed to PATH. 
+
+# Note
+This has been untested on Linux and Mac.
 
 Format of config.txt:
 
