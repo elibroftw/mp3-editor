@@ -65,10 +65,10 @@ def individual_select(filename):
                         set_album_cover(filename, url=input('Enter url: '))
                     elif album_art_choice == 3:
                         set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album art', filetypes=[('Image', '*.jpg *.jpeg *.png')]))
-                        root.destroy()
+                        root.withdraw()
                     elif album_art_choice == 4:
                         set_album_cover(filename, copy_from=filedialog.askopenfilename(title='Select 2nd track', filetypes=[('Audio', '*.mp3')]))
-                        root.destroy()
+                        root.withdraw()
                     elif album_art_choice == 5:
                         search_title = input('Enter the title: ')
                         search_artist = input('Enter the artist: ')
@@ -120,7 +120,7 @@ def main():
     music_directory = config.get('MUSIC_LOCATION', '')
     while music_directory == '' or not os.path.exists(music_directory):
         music_directory = filedialog.askdirectory(title='Select Music Directory')
-        root.destroy()
+        root.withdraw()
     chdir(music_directory)
     output_intro = True
     while True:
@@ -140,7 +140,7 @@ def main():
         output_intro = True
         if user_choice == 1:
             music_directory = filedialog.askdirectory(title='Select Music Directory')
-            root.destroy()
+            root.withdraw()
             if os.path.exists(music_directory):
                 chdir(music_directory)
                 print('Directory changed to', music_directory)
@@ -155,7 +155,7 @@ def main():
                     set_album_cover(file)
         elif user_choice == 4:
             file = filedialog.askopenfilename(title='Select track', filetypes=[('Audio', '*.mp3')])
-            root.destroy()
+            root.withdraw()
             individual_select(file)
         elif user_choice == 5:
             files = glob('*.mp3')

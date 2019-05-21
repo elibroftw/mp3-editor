@@ -19,6 +19,16 @@ except ImportError as e:
     print(e)
     print('Press Enter to quit...')
     quit()
+
+# TDOD: just add ffmpeg binary to the repo
+if not os.system('ffmpeg'):
+    print('FFMPEG NOT ON PATH')
+    input('Press enter to go to FFMPEG website and how to add to path...')
+    import webbrowser
+    webbrowser.open('http://example.com')
+    webbrowser.open('http://blog.gregzaal.com/how-to-install-ffmpeg-on-windows/')
+    quit()
+
 # this dictionary store the api keys
 config = {}
 # TODO: don't change album cover if its already the album cover
@@ -341,6 +351,7 @@ def ffmpeg_helper(filename, command):
     temp_path = get_temp_path(filename)
     os.rename(filename, temp_path)
     os.system(command)
+    print('test')
     audio = EasyID3(filename)
     audio['artist'] = artists
     audio['title'] = title
