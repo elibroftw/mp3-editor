@@ -15,6 +15,7 @@ except ImportError as e:
 
 starting_directory = getcwd()
 root = tk.Tk()
+root.withdraw()
 # TODO: make into a gui
 
 

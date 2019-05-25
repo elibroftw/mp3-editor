@@ -18,7 +18,7 @@ def center(top_level):
     x = w / 2 - size[0] / 2
     y = h / 2 - size[1] / 2 - 100
     # noinspection PyStringFormat
-    top_level.geometry("%dx%d+%d+%d" % (size + (x, y)))
+    top_level.geometry('%dx%d+%d+%d' % (size + (x, y)))
 
 
 current_image_index = 0
@@ -27,7 +27,14 @@ toaster = ToastNotifier()
 
 def main(image_urls):
     global current_image_index
-    root = tk.Tk()
+    if __name__ == "__main__":
+        root = tk.Tk()
+    else:
+        root = tk.Toplevel()
+        root.geometry('734x480')
+        root.deiconify()
+        
+        
     root.wm_title('Image selector')
     images = {}
     current_image_index = 0
@@ -40,7 +47,7 @@ def main(image_urls):
             image = Image.open(io.BytesIO(raw_data))
             image = image.resize((450, 450), Image.ANTIALIAS)
             image = ImageTk.PhotoImage(image)
-            images[0] = image
+            images[index] = image
         return image
 
     label = tk.Label(root, image=load_image(0), background='#454545', borderwidth=1)
@@ -56,7 +63,8 @@ def main(image_urls):
     def select_image():
         url = image_urls[current_image_index]
         os.environ['SELECTED_URL'] = url
-        root.destroy()
+        root.withdraw()
+        root.quit()
 
     def next_image():
         global current_image_index
@@ -69,6 +77,10 @@ def main(image_urls):
         copy(image_urls[current_image_index])
         toaster.show_toast('Image Selector', 'Copied image url to clipboard', duration=4, threaded=True)
 
+    def on_close():
+        root.withdraw()
+        root.quit()
+
     button_font = Font(family='Verdana', size=11)
     bg = '#0EABE0'
     abg = '#68CBED'
@@ -77,22 +89,23 @@ def main(image_urls):
     label2 = tk.Label(root, text=label_text, foreground='white', width=15, font=button_font, borderwidth=0, background='#121212')
     label2.grid(row=1, column=1)
 
-    tk.Button(command=prev_image, text='Previous image', width=15, font=button_font, background=bg, activebackground=abg, borderwidth=0).grid(row=2, column=1)
+    tk.Button(root, command=prev_image, text='Previous image', width=15, font=button_font, background=bg, activebackground=abg, borderwidth=0).grid(row=2, column=1)
     root.bind('<Left>', lambda _: prev_image())
     root.bind('a', lambda _: prev_image())
     root.bind('A', lambda _: prev_image())
-    tk.Button(command=select_image, text='Select', width=15, font=button_font, background=bg, activebackground=abg, borderwidth=0).grid(row=2, column=2)
-    tk.Button(command=next_image, text='Next image', width=15, font=button_font, background=bg, activebackground=abg, borderwidth=0).grid(row=2, column=3)
+    tk.Button(root, command=select_image, text='Select', width=15, font=button_font, background=bg, activebackground=abg, borderwidth=0).grid(row=2, column=2)
+    tk.Button(root, command=next_image, text='Next image', width=15, font=button_font, background=bg, activebackground=abg, borderwidth=0).grid(row=2, column=3)
     label.bind('<Button-1>', lambda _: next_image())
     root.bind('<Right>', lambda _: next_image())
     root.bind('d', lambda _: next_image())
     root.bind('D', lambda _: next_image())
-    root.bind('<Escape>', lambda _: root.destroy())
+    root.bind('<Escape>', lambda _: on_close())
     root.bind('c', lambda _: copy_url())
     root.bind('C', lambda _: copy_url())
-    root.wm_minsize(450, 300)
+    
     root.configure(background='#121212')
     root.resizable(False, False)
+    root.protocol("WM_DELETE_WINDOW", on_close)
     center(root)
     root.mainloop()
 
