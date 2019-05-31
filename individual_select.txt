@@ -1,5 +1,5 @@
-1. Set simple metadata (override=False)
-2. Set simple metadata (override=True)
+1. Set simple metadata [Includes Album Art]
+2. Set simple metadata [Overrides, Includes Album Art] 
 3. Set title
 4. Set artist
 5. Set artists

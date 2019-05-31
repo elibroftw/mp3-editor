@@ -34,6 +34,7 @@ def individual_select(filename):
             sub_menu_user_choice = int(input())
             if sub_menu_user_choice == 1:
                 add_simple_meta(filename)
+                print('Simple metadata set')
             elif sub_menu_user_choice == 2:
                 add_simple_meta(filename, override=True)
                 print('Simple metadata set')
