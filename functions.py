@@ -1,3 +1,6 @@
+from pprint import pprint
+from time import time
+
 try:
     import base64
     import shlex
@@ -36,6 +39,8 @@ if ar == err:
 
 # this dictionary store the api keys
 config = {}
+spotify_access_token_creation = 0
+spotify_access_token = ''
 # TODO: don't change album cover if its already the album cover
 
 
@@ -45,6 +50,17 @@ def copy(text):
         system(command)
         return True
     return False
+
+
+def get_spotify_access_token(B64_AUTH):
+    global spotify_access_token, spotify_access_token_creation
+    if time() - spotify_access_token_creation > 21600:
+        spotify_access_token_creation = time()
+        header = {'Authorization': 'Basic ' + SPOTIFY_B64_AUTH_STR}
+        data = {'grant_type': 'client_credentials'}
+        access_token_response = requests.post('https://accounts.spotify.com/api/token', headers=header, data=data)
+        spotify_access_token = access_token_response.json()['access_token']
+    return spotify_access_token
 
 
 try:
@@ -59,9 +75,11 @@ try:
                 varValue = float(varValue) if varValue.replace('.', '', 1).isdigit() else varValue
             config[line[:space_index]] = varValue
 
-    # set the spotify auth str (needs to be base64 encoded)
     SPOTIFY_AUTH_STR = f"{config['SPOTIFY_CLIENT_ID']}:{config['SPOTIFY_SECRET']}"
     SPOTIFY_B64_AUTH_STR = base64.urlsafe_b64encode(SPOTIFY_AUTH_STR.encode()).decode()
+
+    LASTFM_API = config['LASTFM_API']
+    LASTFM_SECRET =config['LASTFM_SECRET']
 except (FileNotFoundError, KeyError):
     print('Limited functionality')
 
@@ -247,7 +265,7 @@ def has_album_art(mp3_path) -> bool:
 has_mp3_cover = has_album_cover = has_album_art
 
 
-def get_album_art(artist, title, access_token='', select_index=0, return_all=False):
+def get_album_art(artist, title, select_index=0, return_all=False):
     """
     Fetches max resolution album art(s) for track (artist and title specified) using Spotify API
     :param artist: artist
@@ -260,14 +278,8 @@ def get_album_art(artist, title, access_token='', select_index=0, return_all=Fal
     # TODO: add soundcloud search as well if spotify comes up with no results.
     #  Soundcloud has it disabled
     artist, title = parse.quote_plus(artist), parse.quote_plus(title)
-    if not access_token:
-        header = {'Authorization': 'Basic ' + SPOTIFY_B64_AUTH_STR}
-        data = {'grant_type': 'client_credentials'}
-        access_token_response = requests.post('https://accounts.spotify.com/api/token', headers=header, data=data)
-        access_token = access_token_response.json()['access_token']
-    header = {'Authorization': 'Bearer ' + access_token}
+    header = {'Authorization': 'Bearer ' + get_spotify_access_token(SPOTIFY_B64_AUTH_STR)}
     r = requests.get(f'https://api.spotify.com/v1/search?q={title}+artist:{artist}&type=track', headers=header)
-
     if return_all: return [item['album']['images'][0]['url'] for item in r.json()['tracks']['items']]
     return r.json()['tracks']['items'][select_index]['album']['images'][0]['url']
 
@@ -379,6 +391,37 @@ def remove_silence(filename):
     command = f'ffmpeg -i "{temp_path}" -af silenceremove=start_periods=1:stop_periods=1:detection=peak "{filename}" ' \
               f'> ffmpeg.log 2>&1'
     ffmpeg_helper(filename, command)
+
+
+def set_genre(filename, genres=None):
+    # requires last fm api
+    if genres is None:
+        easy_audio = EasyID3(filename)
+        artist, title = easy_audio['artist'][0], easy_audio['title'][0]
+        error_string = f'Genre not set for {artist} - {title}'
+        artist, title = parse.quote_plus(artist), parse.quote_plus(title)
+        url = f'https://ws.audioscrobbler.com/2.0/?method=track.getInfo&track={title}&artist={artist}&api_key={LASTFM_API}&format=json'
+        r = requests.get(url)
+        try: sample = r.json()['track']['toptags']['tag']
+        except KeyError:
+            print(error_string)
+            return False
+        genres = [tag['name'] for tag in sample][:3]
+    audio = MP3(filename)
+    audio['TCON'] = mutagen.id3.TCON(encoding=3, text=u';'.join(genres))  # genre key is TCON
+    audio.save()
+    return True
+
+
+def get_genre(filename):
+    audio = MP3(filename)
+    return audio.get('TCON')
+
+
+# audio[u"USLT::'eng'"] = (USLT(encoding=3, lang=u'eng', desc=u'desc', text=lyrics))
+def get_lyrics(filename):
+    audio = MP3(filename)
+    return audio.get(u"USLT::'eng'")
 
 
 if __name__ == '__main__':
