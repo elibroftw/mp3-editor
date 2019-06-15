@@ -1,11 +1,10 @@
-try:
-    from glob import glob
-    from os import chdir, rename, path, getcwd
-    from tkinter import filedialog
-    import tkinter as tk
+from glob import glob
+from os import chdir, rename, path, getcwd
+from tkinter import filedialog
+import tkinter as tk
 
+try:
     from tqdm import tqdm
-    
     from functions import *
     import image_selector
 except ImportError as e:
@@ -76,7 +75,7 @@ def individual_select(filename):
                         search_artist = input('Enter the artist: ')
                         results = get_album_art(search_artist, search_title, return_all=True)
                         if results:
-                            image_selector.main(results)
+                            image_selector.main(results, artist=search_artist, track=search_title)
                             url = os.environ.pop('SELECTED_URL', None)
                             if url:
                                 set_album_cover(filename, url=url)
@@ -173,7 +172,7 @@ def main():
             search_artist = input('Enter the artist: ')
             results = get_album_art(search_artist, search_title, return_all=True)
             if results:
-                image_selector.main(results)
+                image_selector.main(results, artist=search_artist, track=search_title)
                 url = os.environ.pop('SELECTED_URL', None)
                 if url:
                     if copy(url): print('Copied url to clipboard!')
@@ -185,4 +184,5 @@ def main():
             print('Please enter an integer from 1 to 7')
 
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()
