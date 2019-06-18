@@ -111,10 +111,10 @@ def individual_select(filename):
                 on_menu = False
             else:
                 print(individual_select_menu_text)
-            if 0 < sub_menu_user_choice < 14:
+            if 0 < sub_menu_user_choice < 15:
                 print('Enter an option')
-            else: print('Please enter an integer from 1 to 13')
-        except ValueError: print('Please enter an integer from 1 to 13')
+            else: print('Please enter an integer from 1 to 15')
+        except ValueError: print('Please enter an integer from 1 to 15')
 
 
 def main():
