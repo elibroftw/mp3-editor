@@ -1,13 +1,14 @@
 import io
 import os
 import tkinter as tk
+from contextlib import suppress
 from tkinter.font import Font
 import urllib.request
 import webbrowser
-
+from tkinter import filedialog
 from win10toast import ToastNotifier
 from PIL import Image, ImageTk
-
+import PIL
 from functions import copy
 
 
@@ -23,7 +24,7 @@ def center(top_level):
 
 
 current_image_index = 0
-toaster = ToastNotifier()
+toaster = ToastNotifier()  # maybe do two?
 
 
 def main(image_urls, artist='Placeholder', track='Placeholder'):
@@ -39,6 +40,7 @@ def main(image_urls, artist='Placeholder', track='Placeholder'):
     images = {}
     current_image_index = 0
     images = image_urls.copy()
+    images_data = {}
 
     def copy_url():
         copy(image_urls[current_image_index])
@@ -48,14 +50,18 @@ def main(image_urls, artist='Placeholder', track='Placeholder'):
         webbrowser.open_new(image_urls[current_image_index])
 
     def save_to_device():
-        raise NotImplementedError
+        image = images_data[current_image_index]
+        with suppress(ValueError):
+            filename = filedialog.asksaveasfilename(title='Specify Save filename', initialfile=f'Album art {current_image_index + 1} - {artist} - {track} ', filetypes=(('PNG file', '*.png'), ('JPEG file', '*.jpg')), defaultextension='*.*')
+            image.save(filename)
+            toaster.show_toast('Image Selector', 'Saved image to device', duration=4, threaded=True)
         # 1. get location to save image
         # 2. download image to location
 
     pop_up = tk.Menu(tearoff=0)  # image right click menu
     pop_up.add_command(label='Copy URL', command=copy_url)
     pop_up.add_command(label='Open in browser', command=open_browser)
-    # pop_up.add_command(label='Save to device', command=save_to_device)
+    pop_up.add_command(label='Save to device', command=save_to_device)
 
     def image_right_click(event):
         pop_up.post(event.x_root, event.y_root)
@@ -65,6 +71,7 @@ def main(image_urls, artist='Placeholder', track='Placeholder'):
         if type(image) != ImageTk.PhotoImage:
             raw_data = urllib.request.urlopen(image).read()
             image = Image.open(io.BytesIO(raw_data))
+            images_data[index] = image
             image = image.resize((450, 450), Image.ANTIALIAS)
             image = ImageTk.PhotoImage(image)
             images[index] = image

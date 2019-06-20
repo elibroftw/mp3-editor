@@ -65,10 +65,10 @@ def individual_select(filename):
                     elif album_art_choice == 2:
                         set_album_cover(filename, url=input('Enter url: '))
                     elif album_art_choice == 3:
-                        set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album art', filetypes=[('Image', '*.jpg *.jpeg *.png')]))
+                        set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album art', filetypes=(('Image', '*.jpg *.jpeg *.png'))))
                         root.withdraw()
                     elif album_art_choice == 4:
-                        set_album_cover(filename, copy_from=filedialog.askopenfilename(title='Select 2nd track', filetypes=[('Audio', '*.mp3')]))
+                        set_album_cover(filename, copy_from=filedialog.askopenfilename(initialdir=f'{starting_directory}', title='Select 2nd track', filetypes=(('Audio', '*.mp3'))))
                         root.withdraw()
                     elif album_art_choice == 5:
                         search_title = input('Enter the title: ')
@@ -155,7 +155,7 @@ def main():
                     add_simple_meta(file)
                     set_album_cover(file)
         elif user_choice == 4:
-            file = filedialog.askopenfilename(title='Select track', filetypes=[('Audio', '*.mp3')])
+            file = filedialog.askopenfilename(initialdir=f'{starting_directory}', initialtitle='Select track', filetypes=[('Audio', '*.mp3')])
             root.withdraw()
             individual_select(file)
         elif user_choice == 5:
