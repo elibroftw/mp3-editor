@@ -155,9 +155,9 @@ def main():
                     add_simple_meta(file)
                     set_album_cover(file)
         elif user_choice == 4:
-            file = filedialog.askopenfilename(initialdir=f'{starting_directory}', initialtitle='Select track', filetypes=[('Audio', '*.mp3')])
+            file = filedialog.askopenfilename(initialdir=f'{starting_directory}/', title='Select track', filetypes=[('Audio', '*.mp3')])
             root.withdraw()
-            individual_select(file)
+            if file: individual_select(file)
         elif user_choice == 5:
             files = glob('*.mp3')
             for i, file in enumerate(files): print(f'{i + 1}. {file}')

@@ -8,7 +8,6 @@ import webbrowser
 from tkinter import filedialog
 from win10toast import ToastNotifier
 from PIL import Image, ImageTk
-import PIL
 from functions import copy
 
 
