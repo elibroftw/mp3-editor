@@ -15,10 +15,15 @@ except ImportError as e:
 starting_directory = getcwd()
 root = tk.Tk()
 root.withdraw()
+music_directory = config.get('MUSIC_LOCATION', '')
+while music_directory == '' or not os.path.exists(music_directory):
+    music_directory = filedialog.askdirectory(title='Select Music Directory')
+    root.withdraw()
 # TODO: make into a gui
 
 
 def individual_select(filename):
+    global music_directory
     with open(starting_directory+'/individual_select.txt') as f:
         individual_select_menu_text = f.read()
     print('You selected:', filename)
@@ -65,10 +70,10 @@ def individual_select(filename):
                     elif album_art_choice == 2:
                         set_album_cover(filename, url=input('Enter url: '))
                     elif album_art_choice == 3:
-                        set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album art', filetypes=(('Image', '*.jpg *.jpeg *.png'))))
+                        set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album art', filetypes=[('Image', '*.jpg *.jpeg *.png')]))
                         root.withdraw()
                     elif album_art_choice == 4:
-                        set_album_cover(filename, copy_from=filedialog.askopenfilename(initialdir=f'{starting_directory}', title='Select 2nd track', filetypes=(('Audio', '*.mp3'))))
+                        set_album_cover(filename, copy_from=filedialog.askopenfilename(initialdir=f'{music_directory}', title='Select 2nd track', filetypes=[('Audio', '*.mp3')]))
                         root.withdraw()
                     elif album_art_choice == 5:
                         search_title = input('Enter the title: ')
@@ -118,10 +123,7 @@ def individual_select(filename):
 
 
 def main():
-    music_directory = config.get('MUSIC_LOCATION', '')
-    while music_directory == '' or not os.path.exists(music_directory):
-        music_directory = filedialog.askdirectory(title='Select Music Directory')
-        root.withdraw()
+    global music_directory
     chdir(music_directory)
     output_intro = True
     while True:
@@ -155,7 +157,7 @@ def main():
                     add_simple_meta(file)
                     set_album_cover(file)
         elif user_choice == 4:
-            file = filedialog.askopenfilename(initialdir=f'{starting_directory}', title='Select track', filetypes=[('Audio', '*.mp3')])
+            file = filedialog.askopenfilename(initialdir=f'{music_directory}', title='Select track', filetypes=[('Audio', '*.mp3')])
             root.withdraw()
             if file: individual_select(file)
         elif user_choice == 5:
