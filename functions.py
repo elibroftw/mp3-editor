@@ -353,7 +353,7 @@ def get_temp_path(filename):
     base = os.path.basename(filename)
     base = f'TEMP {base}'
     directory = os.path.dirname(filename)
-    temp_path = directory + '\\' + base
+    temp_path = directory + '/' + base
     # os.rename(filename, temp_path)
     return temp_path
 
@@ -378,6 +378,7 @@ def ffmpeg_helper(filename, command):
     audio['APIC:'] = album_cover
     audio.save()
     os.remove(temp_path)
+    os.remove(os.path.dirname(filename) + '/ffmpeg.log')
 
 
 def trim(filename, start: int, end: int):
