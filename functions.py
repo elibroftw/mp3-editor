@@ -306,8 +306,19 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
         image_data = urlopen(url).read()
         img_path = url
     elif copy_from:
-        audio['APIC:'] = MP3(copy_from, ID3=mutagen.id3.ID3)['APIC:']
-        audio.save()
+        try:
+            other_audio = MP3(copy_from, ID3=mutagen.id3.ID3)
+            audio['APIC:'] = other_audio['APIC:']
+            audio.save()
+        except KeyError:
+            other_audio = other_audio.items()
+            unchanged = True
+            for k, v in other_audio:
+                if k.startswith('APIC:'):
+                    audio['APIC:'] = v
+                    audio.save()
+                    unchanged = False
+            if unchanged:  print('That file is incompatible.')
         return
     else:
         easy_audio = EasyID3(mp3_path)
@@ -426,5 +437,4 @@ def get_lyrics(filename):
 
 
 if __name__ == '__main__':
-    # do non-interface stuff here
     pass

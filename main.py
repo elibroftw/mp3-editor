@@ -100,7 +100,7 @@ def individual_select(filename):
             elif sub_menu_user_choice == 11:  # TODO: Rename file
                 print('Enter new file name (with extension)')
                 new_filename = path.dirname(filename) + '/' + input()
-                if not new_filename.count('.mp3'): new_filename += '.mp3'
+                if not new_filename.count('.'): new_filename += '.mp3'
                 rename(filename, new_filename)
                 print('file name changed from ', pathlib.Path(filename).name, 'to', pathlib.Path(new_filename).name)
                 filename = new_filename
