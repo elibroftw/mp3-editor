@@ -25,8 +25,10 @@ def center(top_level):
 current_image_index = 0
 toaster = ToastNotifier()  # maybe do two?
 
+# def display_images(image_bits):
+#     images = [Image.open(io.BytesIO(image)) for image in image_bits]
 
-def main(image_urls, artist='Placeholder', track='Placeholder'):
+def main(image_urls=[], artist='', track='', image_bits=[]):
     global current_image_index
     if __name__ == "__main__":
         root = tk.Tk()
@@ -36,9 +38,15 @@ def main(image_urls, artist='Placeholder', track='Placeholder'):
         root.deiconify()
 
     root.wm_title('Image selector')
-    images = {}
+    # images = {}
     current_image_index = 0
-    images = image_urls.copy()
+    if image_urls:
+        images = image_urls.copy()
+    elif image_bits:
+        images = image_bits.copy()
+    else:
+        print('error, no images to display')
+        return
     images_data = {}
 
     def copy_url():
@@ -57,9 +65,11 @@ def main(image_urls, artist='Placeholder', track='Placeholder'):
         # 1. get location to save image
         # 2. download image to location
 
+    
     pop_up = tk.Menu(tearoff=0)  # image right click menu
-    pop_up.add_command(label='Copy URL', command=copy_url)
-    pop_up.add_command(label='Open in browser', command=open_browser)
+    if image_urls:
+        pop_up.add_command(label='Copy URL', command=copy_url)
+        pop_up.add_command(label='Open in browser', command=open_browser)
     pop_up.add_command(label='Save to device', command=save_to_device)
 
     def image_right_click(event):
@@ -68,7 +78,10 @@ def main(image_urls, artist='Placeholder', track='Placeholder'):
     def load_image(index):
         image = images[index]
         if type(image) != ImageTk.PhotoImage:
-            raw_data = urllib.request.urlopen(image).read()
+            if image_urls:
+                raw_data = urllib.request.urlopen(image).read()
+            else:
+                raw_data = image
             image = Image.open(io.BytesIO(raw_data))
             images_data[index] = image
             image = image.resize((450, 450), Image.ANTIALIAS)
@@ -83,8 +96,9 @@ def main(image_urls, artist='Placeholder', track='Placeholder'):
     def prev_image():
         global current_image_index
         current_image_index -= 1
-        if current_image_index < 0: current_image_index = len(images) - 1
-        new_text = f'Image {current_image_index + 1}/{len(image_urls)}'
+        number_of_images = len(images)
+        if current_image_index < 0: current_image_index = number_of_images - 1
+        new_text = f'Image {current_image_index + 1}/{number_of_images}'
         label2.configure(text=new_text)
         image_label.configure(image=load_image(current_image_index))
 
@@ -97,8 +111,9 @@ def main(image_urls, artist='Placeholder', track='Placeholder'):
     def next_image():
         global current_image_index
         current_image_index += 1
-        if current_image_index >= len(images): current_image_index = 0
-        new_text = f'Image {current_image_index + 1}/{len(image_urls)}'
+        number_of_images = len(images)
+        if current_image_index >= number_of_images: current_image_index = 0
+        new_text = f'Image {current_image_index + 1}/{number_of_images}'
         label2.configure(text=new_text)
         image_label.configure(image=load_image(current_image_index))
 
@@ -110,14 +125,15 @@ def main(image_urls, artist='Placeholder', track='Placeholder'):
     bg = '#0EABE0'
     abg = '#68CBED'
 
-    label2 = tk.Label(root, text=f'Image 1/{len(image_urls)}', foreground='white', width=15, font=button_font,
+    label2 = tk.Label(root, text=f'Image 1/{len(images)}', foreground='white', width=15, font=button_font,
                       borderwidth=0, background='#121212')
     label2.grid(row=1, column=3)
 
-    search_label = tk.Label(root, text=f'TRACK\n{track}\n\nARTIST\n{artist}', foreground='white',
-                            width=max(len(track), len(artist), 15), font=button_font, borderwidth=0,
-                            background='#121212')
-    search_label.grid(row=1, column=1)
+    if track and artist:
+        search_label = tk.Label(root, text=f'TRACK\n{track}\n\nARTIST\n{artist}', foreground='white',
+                                width=max(len(track), len(artist), 15), font=button_font, borderwidth=0,
+                                background='#121212')
+        search_label.grid(row=1, column=1)
 
     tk.Button(root, command=prev_image, text='Previous image', width=15, font=button_font, background=bg,
               activebackground=abg, borderwidth=0).grid(row=2, column=1)
@@ -128,10 +144,11 @@ def main(image_urls, artist='Placeholder', track='Placeholder'):
     root.bind('S', lambda _: prev_image())
     root.bind('<Down>', lambda _: prev_image())
 
-    tk.Button(root, command=select_image, text='Select', width=15, font=button_font, background=bg,
-              activebackground=abg, borderwidth=0).grid(row=2, column=2)
-    root.bind('<space>', lambda _: select_image())
-    root.bind('<Return>', lambda _: select_image())
+    if image_urls:
+        tk.Button(root, command=select_image, text='Select', width=15, font=button_font, background=bg,
+                activebackground=abg, borderwidth=0).grid(row=2, column=2)
+        root.bind('<space>', lambda _: select_image())
+        root.bind('<Return>', lambda _: select_image())
 
     tk.Button(root, command=next_image, text='Next image', width=15, font=button_font, background=bg,
               activebackground=abg, borderwidth=0).grid(row=2, column=3)

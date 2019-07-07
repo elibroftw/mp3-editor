@@ -443,5 +443,8 @@ def remove_covers(filename):
             audio.pop(key)
     audio.save()
 
+
 if __name__ == '__main__':
-    pass
+    audio_mp3 = MP3(r"C:\Users\maste\Documents\MEGAsync\Music\Moguai, Dimitri Vegas & Like Mike - Mammoth.mp3")
+    covers = [audio_mp3[key].data for key in audio_mp3.keys() if key.startswith('APIC')]
+    print(covers)

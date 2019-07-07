@@ -34,6 +34,7 @@ def individual_select(filename):
         except mutagen.id3.ID3NoHeaderError:
             audio = mutagen.File(filename, easy=True)
             audio.add_tags()
+            audio = EasyID3(filename)
         try:
             sub_menu_user_choice = int(input())
             if sub_menu_user_choice == 1:
@@ -114,9 +115,13 @@ def individual_select(filename):
                 trim(filename, start, end)
             elif sub_menu_user_choice == 14:
                 on_menu = False
+            elif sub_menu_user_choice == 16:
+                audio_mp3 = MP3(filename)
+                covers = [audio_mp3[key].data for key in audio_mp3.keys() if key.startswith('APIC')]
+                image_selector.main(image_bits=covers)
             else:
                 print(individual_select_menu_text)
-            if 0 < sub_menu_user_choice < 16:
+            if 0 < sub_menu_user_choice < 17:
                 print('Enter an option')
             else: print('Please enter an integer from 1 to 15')
         except ValueError: print('Please enter an integer from 1 to 15')
