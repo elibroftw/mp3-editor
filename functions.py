@@ -436,5 +436,12 @@ def get_lyrics(filename):
     return audio.get(u"USLT::'eng'")
 
 
+def remove_covers(filename):
+    audio = MP3(filename)
+    for key in audio.keys():
+        if key.startswith('APIC'):
+            audio.pop(key)
+    audio.save()
+
 if __name__ == '__main__':
     pass
