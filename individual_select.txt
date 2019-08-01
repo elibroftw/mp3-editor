@@ -1,11 +1,11 @@
-1. Set simple metadata [Includes Album Art]
-2. Set simple metadata [Overrides, Includes Album Art] 
+1. Auto set simple metadata and album art
+2. Auto set artist and title (overriding)
 3. Set title
 4. Set artist
 5. Set artists
 6. Set album
 7. Set album artist
-8. Set album cover (auto, url, local image, from another file, manual)
+8. Set album cover (auto, url, local image, from another file, manual search)
 9. Set genre (not yet implemented)
 10. Set year (not yet implemented)
 11. Rename file

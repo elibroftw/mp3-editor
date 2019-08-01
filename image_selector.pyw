@@ -65,7 +65,6 @@ def main(image_urls=[], artist='', track='', image_bits=[]):
         # 1. get location to save image
         # 2. download image to location
 
-    
     pop_up = tk.Menu(tearoff=0)  # image right click menu
     if image_urls:
         pop_up.add_command(label='Copy URL', command=copy_url)

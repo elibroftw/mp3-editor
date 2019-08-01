@@ -196,21 +196,17 @@ def add_simple_meta(mp3_path, artist='', title='', album='', albumartist='', ove
     :param title: given title name
     :param album: given album name
     :param albumartist: given album artist
-    :param override: if True, files metadata is overridden
+    :param override: if True, all of the metadata is overridden
     :return: True or False
     """
     audio = EasyID3(mp3_path)
     filename = pathlib.Path(mp3_path).name  # or filename = mp3_path[:-4]
     try:
-        if artist == '':
-            artist = get_artist(filename)
+        if artist == '': artist = get_artist(filename)
         else:
-            if artist.count(' , '):
-                artist.split(' , ')
-            elif artist.count(', '):
-                artist = artist.split(', ')
-            elif artist.count(','):
-                artist = artist.split(',')
+            if artist.count(' , '): artist.split(' , ')
+            elif artist.count(', '): artist = artist.split(', ')
+            elif artist.count(','): artist = artist.split(',')
         if title == '': title = filename[filename.index('-') + 2:-4]
         if override:
             audio['title'] = title
@@ -219,20 +215,15 @@ def add_simple_meta(mp3_path, artist='', title='', album='', albumartist='', ove
             if albumartist != '': audio['albumartist'] = albumartist
         else:
             if 'album' not in audio:
-                if album == '':
-                    audio['album'] = title
-                else:
-                    audio['album'] = album
+                if album == '': audio['album'] = title
+                else: audio['album'] = album
             if 'title' not in audio: audio['title'] = title
             if 'artist' not in audio: audio['artist'] = artist
             if 'albumartist' not in audio:
-                if albumartist == '':
-                    audio['albumartist'] = artist
-                else:
-                    audio['albumartist'] = albumartist
+                if albumartist == '': audio['albumartist'] = artist
+                else: audio['albumartist'] = albumartist
         audio.save()
-        if not has_album_art(mp3_path):
-            set_album_cover(mp3_path)
+        if not has_album_art(mp3_path): set_album_cover(mp3_path)
         return True
     except ValueError:
         print('Error with', filename)
