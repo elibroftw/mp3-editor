@@ -30,12 +30,13 @@ toaster = ToastNotifier()  # maybe do two?
 
 def main(image_urls=[], artist='', track='', image_bits=[]):
     global current_image_index
-    if __name__ == "__main__":
+    if __name__ == '__main__':
         root = tk.Tk()
     else:
         root = tk.Toplevel()
         root.geometry('800x480')
         root.deiconify()
+        root.focus_force()
 
     root.wm_title('Image selector')
     # images = {}
@@ -59,7 +60,7 @@ def main(image_urls=[], artist='', track='', image_bits=[]):
     def save_to_device():
         image = images_data[current_image_index]
         with suppress(ValueError):
-            filename = filedialog.asksaveasfilename(title='Specify Save filename', initialfile=f'Album art {current_image_index + 1} - {artist} - {track} ', filetypes=(('PNG file', '*.png'), ('JPEG file', '*.jpg')), defaultextension='*.*')
+            filename = filedialog.asksaveasfilename(title='Specify Save filename', initialfile=f'{artist} - {track} - Album art {current_image_index + 1}', filetypes=(('PNG file', '*.png'), ('JPEG file', '*.jpg')), defaultextension='*.*')
             image.save(filename)
             toaster.show_toast('Image Selector', 'Saved image to device', duration=4, threaded=True)
         # 1. get location to save image
@@ -160,6 +161,9 @@ def main(image_urls=[], artist='', track='', image_bits=[]):
     root.bind('<Up>', lambda _: next_image())
 
     root.bind('<Escape>', lambda _: on_close())
+    root.bind('<q>', lambda _: on_close())
+    root.bind('<Q>', lambda _: on_close())
+    
     root.bind('c', lambda _: copy_url())
     root.bind('C', lambda _: copy_url())
 

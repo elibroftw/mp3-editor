@@ -197,11 +197,12 @@ def add_simple_meta(mp3_path, artist='', title='', album='', albumartist='', ove
     :param album: given album name
     :param albumartist: given album artist
     :param override: if True, all of the metadata is overridden
-    :return: True or False
+    :return: True or False depending on whether audio file was changed or not
     """
     audio = EasyID3(mp3_path)
     filename = pathlib.Path(mp3_path).name  # or filename = mp3_path[:-4]
     try:
+        if not override and audio.get('title') and audio.get('artist') and audio.get('allbumartist') and has_album_art(mp3_path): return False
         if artist == '': artist = get_artist(filename)
         else:
             if artist.count(' , '): artist.split(' , ')
