@@ -31,9 +31,9 @@ class MainGUI(tk.Tk):
         #     frame = F(container, self)
         #     self.frames[F] = frame
         #     frame.grid(row=0, column=0, sticky="nsew")
-        
+        self.title('Music Metadata Editor by Elijah Lopez')
         self.show_frame(StartPage)
-        self.title('Music Metadata Editor')
+
 
     def show_frame(self, cont, kwargs={}):
         if cont not in self.frames:
@@ -53,8 +53,6 @@ class StartPage(tk.Frame):
             music_directory = filedialog.askdirectory(title='Select Music Directory')
         chdir(music_directory)
         tk.Frame.__init__(self, parent, bg='#141414')
-        # label = tk.Label(self, text='Music metadata editor', font=LARGE_FONT)
-        # label.pack(pady=10,padx=10)
         self.controller = controller
 
         self.label1 = Label(self, text=f'Working Directory: {music_directory}', bg='#141414', fg='white', font=LARGE_FONT)
@@ -62,29 +60,19 @@ class StartPage(tk.Frame):
 
         button1 = Button(self, text=f'Change Directory', bg=bbg, activebackground=babg, command=self.change_directory)
         button1.pack(pady=10)
-        self.bind('1', lambda _: self.change_directory())
 
         button2 = Button(self, text='Autoset metadata for files with missing metadata and album art', bg=bbg, activebackground=babg, command=self.set_missing_metadata)
         button2.pack(pady=10)
-        self.bind('2', lambda _: self.set_missing_metadata())
 
         button3 = Button(self, text='Select an individual track', bg=bbg, activebackground=babg, command=self.select_individual_track)
         button3.pack(pady=10)
-        self.bind('3', lambda _: self.select_individual_track())
 
         button4 = Button(self, text='View music files in directory', bg=bbg, activebackground=babg, command=self.view_music_files)
         button4.pack(pady=10)
-        self.bind('4', lambda _: self.view_music_files())
-
+        
         button5 = Button(self, text='Search for album covers', bg=bbg, activebackground=babg, command=self.search_for_album_covers)
         button5.pack(pady=10)
-        self.bind('5', lambda _: self.search_for_album_covers())
-
-        controller.bind('<Escape>', lambda _: self.quit())
-        controller.bind('<q>', lambda _: self.quit())
-        controller.bind('<Q>', lambda _: self.quit())
-        controller.unbind('<Return>')
-        self.focus()
+        # self.focus()
 
     def change_directory(self):
         global music_directory
@@ -100,17 +88,42 @@ class StartPage(tk.Frame):
 
     def set_missing_metadata(self):
         for file in glob('*.mp3'): add_simple_meta(file)
-        print('Metadata for all tracks set')
+        # TODO: status message
 
     def select_individual_track(self):
         file = filedialog.askopenfilename(initialdir=f'{music_directory}', title='Select track', filetypes=[('Audio', '*.mp3')])
-        if file: self.controller.show_frame(InvidualTrackPage, {'filename': file})
+        if file:
+            self.controller.bind('<Escape>', lambda _: self.controller.show_frame(StartPage))
+            self.unbind_numbers()
+            self.controller.show_frame(InvidualTrackPage, {'filename': file})
 
     def view_music_files(self):
+        self.controller.bind('<Escape>', lambda _: self.controller.show_frame(StartPage))
+        self.unbind_numbers()
         self.controller.show_frame(MusicFilesPage, {'directory': music_directory})
 
     def search_for_album_covers(self):
+        self.controller.bind('<Escape>', lambda _: self.controller.show_frame(StartPage))
+        self.unbind_numbers()
         self.controller.show_frame(AlbumCoverSearcher)
+
+    def unbind_numbers(self):
+        for i in range(1, 6): self.unbind(str(i))
+
+    def bindings(self):
+        self.bind('1', lambda _: self.change_directory())
+        self.bind('2', lambda _: self.set_missing_metadata())
+        self.bind('3', lambda _: self.select_individual_track())        
+        self.bind('4', lambda _: self.view_music_files())
+        self.bind('5', lambda _: self.search_for_album_covers())
+        self.controller.bind('<Escape>', lambda _: self.quit())
+        self.controller.bind('<q>', lambda _: self.quit())
+        self.controller.bind('<Q>', lambda _: self.quit())
+        self.controller.unbind('<Return>')
+
+    def tkraise(self, aboveThis=None):
+        self.bindings()
+        return super().tkraise(aboveThis=aboveThis)
     
 
 class MusicFilesPage(tk.Frame):
@@ -119,76 +132,191 @@ class MusicFilesPage(tk.Frame):
         tk.Frame.__init__(self, parent, width=200, height=400, bg='#141414')
         # controller.geometry(f'{controller.winfo_width()}x250')
         center(controller)
+        self.old_w, self.old_h = self.winfo_reqwidth(), self.winfo_reqheight()
         self.controller = controller
         self.directory = kwargs['directory']
-        label = tk.Label(self, text=f'Music files in .../{os.path.basename(self.directory)}', font=LARGE_FONT, bg='#141414', fg='white')
-        label.pack(pady=10, padx=10, side=tk.TOP)
-        self.files = glob(f'{self.directory}/*.mp3')
-        
-        buttons = tk.Frame(self, bg='#141414')
-        buttons.pack(side=tk.TOP)
+
+        top_stuff = tk.Frame(self, bg='#141414')
+        top_stuff.pack(side=tk.TOP, pady=20)
         
         button1 = tk.Button(self, text='Back', bg=bbg, activebackground=babg, command=lambda: controller.show_frame(StartPage))
-        button1.pack(in_=buttons, side=tk.LEFT, padx=50)
-        # blank = tk.Label(self, text='                   ', bg='#141414', activebackground='#141414', highlightbackground='#141414', relief=tk.FLAT, pady=4)
-        # blank.pack(in_=buttons, side=tk.LEFT)
-        button2 = tk.Button(self, text='Select File', bg=bbg, activebackground=babg, command=self.select_individual_track)
-        button2.pack(in_=buttons, side=tk.RIGHT, padx=50)
-        # add listbox
+        button1.pack(in_=top_stuff, side=tk.LEFT)
+        
+        label = tk.Label(self, text=f'Music files in .../{os.path.basename(self.directory)}', font=LARGE_FONT, bg='#141414', fg='white')
+        label.pack(in_=top_stuff, padx=140, side=tk.RIGHT)
+
+        self.files = glob(f'{self.directory}/*.mp3')
+        
         self.listbox = Listbox(self, width=200, bg='#141414', fg='white')
-        self.listbox.pack(side=tk.BOTTOM)
+        self.listbox.pack()
         for file in self.files:
             self.listbox.insert(tk.END, os.path.basename(file))
+
+        button2 = tk.Button(self, text='Select File', bg=bbg, activebackground=babg, command=self.select_individual_track)
+        button2.pack(pady=20)
 
     def select_individual_track(self):
         file = self.files[self.listbox.curselection()[0]]
         self.controller.bind('<Escape>', lambda _: self.controller.show_frame(MusicFilesPage, {'directory': self.directory}))
-        if file: self.controller.show_frame(InvidualTrackPage, {'filename': file})
+        if file: self.controller.show_frame(InvidualTrackPage, {'filename': file, 'previous_page': MusicFilesPage, 'directory': self.directory})
+
+    def resize(self):
+        self.controller.geometry(f'{self.oldw}x{self.oldh}')
+
 
 
 class InvidualTrackPage(tk.Frame):
 
     def __init__(self, parent, controller, kwargs):
         tk.Frame.__init__(self, parent, bg='#141414')
-        self.file = kwargs['filename']
-        label = tk.Label(self, text=os.path.basename(self.file), font=LARGE_FONT, bg='#141414', fg='white', highlightbackground='#303030', highlightcolor='blue')
-        label.pack(pady=10,padx=10)
+        self.filename = kwargs['filename']
+        self.previous_page = kwargs.get('previous_page', StartPage)
+        self.controller = controller
+        self.old_w, self.old_h = self.controller.winfo_width(), self.controller.winfo_height()
+        self.controller.geometry(f'{self.old_w}x{int(self.old_h * 2)}')
+        center(self.controller)
+        self.kwargs = kwargs
+        try: self.audio = EasyID3(self.filename)
+        except mutagen.id3.ID3NoHeaderError:
+            self.audio = mutagen.File(self.filename, easy=True)
+            self.audio.add_tags()
+            self.audio = EasyID3(self.filename)
 
-        button1 = tk.Button(self, text='Back', bg=bbg, activebackground=babg, command=lambda: controller.show_frame(StartPage))
-        button1.pack()
+        label = tk.Label(self, text=os.path.basename(self.filename), font=LARGE_FONT, bg='#141414', fg='white', highlightbackground='#303030', highlightcolor='blue')
+        label.pack(pady=20, padx=10)
 
-        # button2 = tk.Button(self, text='Page Two', bg=bbg, activebackground=babg, command=None)
-        # button2.pack()
+        button1 = tk.Button(self, text='Back', bg=bbg, activebackground=babg, command=self.back)
+        button1.pack(pady=10, padx=10)
 
+        button2 = tk.Button(self, text='Auto set metadata and album art', bg=bbg, activebackground=babg, command=self.auto_set_metadata)
+        button2.pack(pady=10, padx=10)
+
+        button3 = tk.Button(self, text='Auto set (override) artist and title', bg=bbg, activebackground=babg, command=lambda: self.auto_set_metadata(True))
+        button3.pack(pady=10, padx=10)
+        
+        button4 = tk.Button(self, text='Set artist(s) (comma separated)', bg=bbg, activebackground=babg, command=self.set_artists)
+        button4.pack(pady=10, padx=10)
+        
+        button5 = tk.Button(self, text='Set title', bg=bbg, activebackground=babg, command=self.set_title)
+        button5.pack(pady=10, padx=10)
+
+        button6 = tk.Button(self, text='Set album', bg=bbg, activebackground=babg, command=self.set_album)
+        button6.pack(pady=10, padx=10)
+        
+        button7 = tk.Button(self, text='Set album artist', bg=bbg, activebackground=babg, command=self.set_album_artist)
+        button7.pack(pady=10, padx=10)
+
+        # put a combobox to the left of this; (auto, url, local image, from another file, manual search)
+        button8 = tk.Button(self, text='Set album cover', bg=bbg, activebackground=babg, command=self.set_album_cover)
+        button8.pack(pady=10, padx=10)
+
+        # button9 = tk.Button(self, text='Set genre', bg=bbg, activebackground=babg, command=self.set_genre)
+        # button9.pack(pady=10, padx=10)
+
+        # button10 = tk.Button(self, text='Set year', bg=bbg, activebackground=babg, command=self.set_year)
+        # button10.pack(pady=10, padx=10)
+
+        button11 = tk.Button(self, text='Rename File', bg=bbg, activebackground=babg, command=self.rename_file)
+        button11.pack(pady=10, padx=10)
+
+        button12 = tk.Button(self, text='Trim audio (seconds)', bg=bbg, activebackground=babg, command=self.trim_audio)
+        button12.pack(pady=10, padx=10)
+
+        button13 = tk.Button(self, text='View album covers', bg=bbg, activebackground=babg, command=self.view_album_covers)
+        button13.pack(pady=10, padx=10)
+
+        self.bind('1', lambda _: self.auto_set_metadata())
+        self.bind('2', lambda _: self.auto_set_metadata(True))
+        self.bind('3', lambda _: self.set_title())        
+        self.bind('4', lambda _: self.set_artists())
+        self.bind('5', lambda _: self.set_album())
+        self.bind('6', lambda _: self.set_album_artist())
+        self.bind('7', lambda _: self.set_album_cover())
+        self.bind('8', lambda _: self.set_genre())
+        self.bind('9', lambda _: self.set_album())
+        self.bind('10', lambda _: self.set_year())
+        self.bind('11', lambda _: self.rename_file())
+        self.bind('12', lambda _: self.trim_audio())
+        self.bind('13', lambda _: self.view_album_covers())
+        
+        # have all the properties somewhere
+
+    def auto_set_metadata(self, override=False):
+        add_simple_meta(self.filename, override=override)
+    
+    def set_title(self):
+        # set_title(self.audio, input('Enter title: '))
+        pass
+        
+    def set_artists(self):
+        pass
+
+    def set_album(self):
+        pass
+
+    def set_album_artist(self):
+        pass
+
+    def set_album_cover(self):
+        pass
+
+    def set_genre(self):
+        raise NotImplementedError
+
+    def set_year(self):
+        raise NotImplementedError
+
+    def rename_file(self):
+        pass
+
+    def trim_audio(self):
+        pass
+
+    def view_album_covers(self):
+        self.controller.withdraw()
+        audio_mp3 = MP3(self.filename)
+        covers = [audio_mp3[key].data for key in audio_mp3.keys() if key.startswith('APIC')]
+        image_selector.main(image_bits=covers)
+        self.controller.deiconify()
+
+    def back(self):
+        if self.previous_page == StartPage: self.controller.show_frame(self.previous_page)
+        else: self.controller.show_frame(self.previous_page, self.kwargs)
+        self.controller.geometry(f'{self.old_w}x{self.old_h}')
+        center(self.controller)
+        
 
 class AlbumCoverSearcher(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent, bg='#141414')
         self.controller = controller
-        label1 = Label(self, text='Search For Album Art', bg='#141414', fg='white', font=LARGE_FONT)
-        label1.pack()
-
+        
         top_stuff = tk.Frame(self, bg='#141414')
-        top_stuff.pack(side=tk.TOP)
+        top_stuff.pack(side=tk.TOP, pady=20)
 
         button1 = tk.Button(self, text='Back', bg=bbg, activebackground=babg, command=lambda: controller.show_frame(StartPage))
         button1.pack(in_=top_stuff, side=tk.LEFT)
 
+        label1 = Label(self, text='Search For Album Art', bg='#141414', fg='white', font=LARGE_FONT)
+        label1.pack(in_=top_stuff, side=tk.RIGHT, padx=150)
+
+        search_stuff = tk.Frame(self, bg='#141414')
+        search_stuff.pack(side=tk.TOP)      
+
         self.artist_variable = tk.StringVar(value='Artist name')
         artist_entry = tk.Entry(self, textvariable=self.artist_variable)
-        artist_entry.pack(in_=top_stuff, side=tk.LEFT, padx=30)
+        artist_entry.pack(in_=search_stuff, side=tk.LEFT, padx=30)
 
         self.track_variable = tk.StringVar(value='Track name')
         track_entry = tk.Entry(self, textvariable=self.track_variable)
-        track_entry.pack(in_=top_stuff, side=tk.LEFT, padx=30)
+        track_entry.pack(in_=search_stuff, side=tk.LEFT, padx=30)
 
         button2 = tk.Button(self, text='Search!', bg=bbg, activebackground=babg, command=self.search_art)
-        button2.pack(in_=top_stuff, side=tk.RIGHT)
+        button2.pack(in_=search_stuff, side=tk.RIGHT)
 
         self.label2 = Label(self, text='', bg='#141414', fg='white', font=('Verdana', 10))
         self.label2.pack()
         
-        self.bind('<Escape>', lambda _: controller.show_frame(StartPage))
         controller.bind('<Return>', lambda _: self.search_art())
         artist_entry.focus()
     

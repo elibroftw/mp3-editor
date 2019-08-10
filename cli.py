@@ -46,17 +46,16 @@ def individual_select(filename):
                 set_title(audio, input('Enter title: '))
                 print('Title set')
             elif sub_menu_user_choice == 4:
-                set_artist(audio, input('Enter artist: '))
-                print('Artist set')
+                artists = input('Enter artist(s) (comma separated eg. "Elijah, Lopez"): ')
+                if ', ' in artists: artists = artists.split(', ')
+                set_artist(audio, artists)
+                print('Artist(s) set')
             elif sub_menu_user_choice == 5:
-                set_artist(audio, input('Enter artists (comma separated eg. "Elijah, Lopez"): ').split(', '))
-                print('Artists set')
-            elif sub_menu_user_choice == 6:
                 set_album(audio, input('Enter album: '))
                 print('Album title set')
-            elif sub_menu_user_choice == 7:
+            elif sub_menu_user_choice == 6:
                 set_album_artist(audio, input('Enter album artist: '))
-            elif sub_menu_user_choice == 8:
+            elif sub_menu_user_choice == 7:
                 print('1. Auto')
                 print('2. Url')
                 print('3. Local Image')
@@ -91,36 +90,36 @@ def individual_select(filename):
                         print('Album cover set')
                 except ValueError:
                     pass
-            elif sub_menu_user_choice == 9:
+            elif sub_menu_user_choice == 8:
                 # set_genre(audio, input('Enter genre: '))
                 pass
-            elif sub_menu_user_choice == 10:
+            elif sub_menu_user_choice == 9:
                 # set_year(audio, input('Enter year (YYYY):)
                 pass
-            elif sub_menu_user_choice == 11:  # TODO: Rename file
+            elif sub_menu_user_choice == 10:  # TODO: Rename file
                 print('Enter new file name (with extension)')
                 new_filename = path.dirname(filename) + '/' + input()
                 if not new_filename.count('.'): new_filename += '.mp3'
                 rename(filename, new_filename)
                 print('file name changed from ', pathlib.Path(filename).name, 'to', pathlib.Path(new_filename).name)
                 filename = new_filename
-            elif sub_menu_user_choice == 12:
+            elif sub_menu_user_choice == 11:
                 for k, v in audio.items():
                     print(k, ':', v)
                 print('album cover :', has_album_art(filename))
-            elif sub_menu_user_choice == 13:
+            elif sub_menu_user_choice == 12:
                 start = int(input('Enter start time (seconds): '))
                 end = int(input('Enter end time (seconds): '))
                 trim(filename, start, end)
-            elif sub_menu_user_choice == 14:
+            elif sub_menu_user_choice == 13:
                 on_menu = False
-            elif sub_menu_user_choice == 16:
+            elif sub_menu_user_choice == 14:
                 audio_mp3 = MP3(filename)
                 covers = [audio_mp3[key].data for key in audio_mp3.keys() if key.startswith('APIC')]
                 image_selector.main(image_bits=covers)
             else:
                 print(individual_select_menu_text)
-            if 0 < sub_menu_user_choice < 17:
+            if 0 < sub_menu_user_choice < 16:
                 print('Enter an option')
             else: print('Please enter an integer from 1 to 15')
         except ValueError: print('Please enter an integer from 1 to 15')

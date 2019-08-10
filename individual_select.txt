@@ -1,15 +1,15 @@
 1. Auto set simple metadata and album art
 2. Auto set artist and title (overriding)
 3. Set title
-4. Set artist
-5. Set artists
-6. Set album
-7. Set album artist
-8. Set album cover (auto, url, local image, from another file, manual search)
-9. Set genre (not yet implemented)
-10. Set year (not yet implemented)
-11. Rename file
-12. Print properties
-13. Trim audio
-14. Exit
+4. Set artist(s)
+5. Set album
+6. Set album artist
+7. Set album cover (auto, url, local image, from another file, manual search)
+8. Set genre (not yet implemented)
+9. Set year (not yet implemented)
+10. Rename file
+11. Print properties
+12. Trim audio
+13. Exit
+14. View album covers
 15. Reprint Text
