@@ -5,6 +5,7 @@ try:
     import base64
     import shlex
     from glob import glob
+    import io
     import os
     from os import system
     import subprocess
@@ -18,6 +19,7 @@ try:
     import mutagen.id3
     from mutagen.id3 import Encoding
     from mutagen.mp3 import MP3
+    from PIL import Image
     import requests
     
 except ImportError as e:
@@ -25,7 +27,7 @@ except ImportError as e:
     print('Press Enter to quit...')
     quit()
 
-# TDOD: just add ffmpeg binary to the repo
+# TODO: Add ffmpeg binary to the repo
 p = subprocess.Popen('ffmpeg', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 out, err = p.communicate()
 ar = b"'ffmpeg' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n"
@@ -52,7 +54,7 @@ def copy(text):
     return False
 
 
-def get_spotify_access_token(B64_AUTH):
+def get_spotify_access_token():
     global spotify_access_token, spotify_access_token_creation
     if time() - spotify_access_token_creation > 21600:
         spotify_access_token_creation = time()
@@ -79,14 +81,13 @@ try:
     SPOTIFY_B64_AUTH_STR = base64.urlsafe_b64encode(SPOTIFY_AUTH_STR.encode()).decode()
 
     LASTFM_API = config['LASTFM_API']
-    LASTFM_SECRET =config['LASTFM_SECRET']
+    LASTFM_SECRET = config['LASTFM_SECRET']
+
+    # this is for future when I get a Soundcloud api key
+    # SOUNDCLOUD_CLIENT_ID = config['SOUNDCLOUD_CLIENT_ID']
+    # SOUNDCLOUD_CLIENT_SECRET = config['SOUNDCLOUD_CLIENT_SECRET']
 except (FileNotFoundError, KeyError):
     print('Limited functionality')
-
-
-# this is for future when I get a Soundcloud api key
-# SOUNDCLOUD_CLIENT_ID = config['SOUNDCLOUD_CLIENT_ID']
-# SOUNDCLOUD_CLIENT_SECRET = config['SOUNDCLOUD_CLIENT_SECRET']
 
 
 def set_title(audio: EasyID3, title: str):
@@ -130,68 +131,47 @@ def set_album_artist(audio: EasyID3, album_artist):
 
 
 def get_artist(filename):
+    """
+    Extraction of artist name(s) from filename
+    Different ways to name a file
+    Lots of these are just-in-case situations
+    The standard for naming multiple artists is comma separated values with a space after each comma
+    Eg. filename = "artist_1, artist_2, artist_3 - title.mp3"
+    """
+
     artist = filename[:filename.index(' -')]
 
-    # Extraction of artist(s) name(s) from filename
-    # Different ways to name a file
-    # Lots of these are just-in-case situations
-    # The standard for naming multiple artists is comma sepearted values with a space after each comma
-    # Eg. path = "artist_1, artist_2, artist_3 - title.mp3"
+    if artist.count(' , '): artist.split(' , ')
+    elif artist.count(', '): artist = artist.split(', ')
+    elif artist.count(','): artist = artist.split(',')
 
-    # ,
-    if artist.count(' , '):
-        artist.split(' , ')
-    elif artist.count(', '):
-        artist = artist.split(', ')
-    elif artist.count(','):
-        artist = artist.split(',')
+    if artist.count(' vs. '): artist = artist.split(' vs. ')
+    elif artist.count(' vs '): artist = artist.split(' vs ')
+    elif artist.count(' vs.'): artist = artist.split(' vs.')
+    elif artist.count(' vs'): artist = artist.split(' vs')
 
-    # vs
-    if artist.count(' vs. '):
-        artist = artist.split(' vs. ')
-    elif artist.count(' vs '):
-        artist = artist.split(' vs ')
-    elif artist.count(' vs.'):
-        artist = artist.split(' vs.')
-    elif artist.count(' vs'):
-        artist = artist.split(' vs')
+    # Cannot split on & because "Dimitri Vegas & Like Mike" is considered as one artist
 
-    # if artist.count(' & '):  # dimitri vegas & like mike are one artist so I can't use this statement
-    #     artist = artist.split(' & ')
+    if artist.count(' and '): artist = artist.split(' and ')
+    elif artist.count(' and'): artist = artist.split(' and')
 
-    # and
-    if artist.count(' and '):
-        artist = artist.split(' and ')
-    elif artist.count(' and'):
-        artist = artist.split(' and')
+    if artist.count(' ft '): artist = artist.split(' ft ')
+    elif artist.count(' ft. '): artist = artist.split(' ft. ')
+    elif artist.count(' ft.'): artist = artist.split(' ft.')
+    elif artist.count(' ft'): artist.split(' ft')
 
-    # ft
-    if artist.count(' ft '):
-        artist = artist.split(' ft ')
-    elif artist.count(' ft. '):
-        artist = artist.split(' ft. ')
-    elif artist.count(' ft.'):
-        artist = artist.split(' ft.')
-    elif artist.count(' ft'):
-        artist.split(' ft')
-
-    # feat
-    if artist.count(' feat '):
-        artist = artist.split(' feat ')
-    elif artist.count(' feat. '):
-        artist = artist.split(' feat. ')
-    elif artist.count(' feat.'):
-        artist = artist.split(' feat.')
-    elif artist.count(' feat'):
-        artist = artist.split(' feat')
+    if artist.count(' feat '): artist = artist.split(' feat ')
+    elif artist.count(' feat. '): artist = artist.split(' feat. ')
+    elif artist.count(' feat.'): artist = artist.split(' feat.')
+    elif artist.count(' feat'): artist = artist.split(' feat')
 
     return artist
 
 
-def add_simple_meta(mp3_path, artist='', title='', album='', albumartist='', override=False):
+def add_simple_meta(file_path, artist='', title='', album='', albumartist='', override=False):
     """
-    Automatically sets the metadata for an mp3 file
-    :param mp3_path: the path to the mp3 file
+    Automatically sets the metadata for a music file
+    :param file_path: the path to the music file
     :param artist: given artist name
     :param title: given title name
     :param album: given album name
@@ -199,10 +179,11 @@ def add_simple_meta(mp3_path, artist='', title='', album='', albumartist='', ove
     :param override: if True, all of the metadata is overridden
     :return: True or False depending on whether audio file was changed or not
     """
-    audio = EasyID3(mp3_path)
-    filename = pathlib.Path(mp3_path).name  # or filename = mp3_path[:-4]
+    audio = EasyID3(file_path)
+    filename = pathlib.Path(file_path).name  # or filename = file_path[:-4]
     try:
-        if not override and audio.get('title') and audio.get('artist') and audio.get('allbumartist') and has_album_art(mp3_path): return False
+        if (not override and audio.get('title') and audio.get('artist')
+            and audio.get('albumartist') and has_album_art(file_path)): return False
         if artist == '': artist = get_artist(filename)
         else:
             if artist.count(' , '): artist.split(' , ')
@@ -224,7 +205,7 @@ def add_simple_meta(mp3_path, artist='', title='', album='', albumartist='', ove
                 if albumartist == '': audio['albumartist'] = artist
                 else: audio['albumartist'] = albumartist
         audio.save()
-        if not has_album_art(mp3_path): set_album_cover(mp3_path)
+        if not has_album_art(file_path): set_album_cover(file_path)
         return True
     except ValueError:
         print('Error with', filename)
@@ -234,13 +215,13 @@ def add_simple_meta(mp3_path, artist='', title='', album='', albumartist='', ove
 set_simple_meta = add_simple_meta
 
 
-def has_album_art(mp3_path) -> bool:
+def has_album_art(file_path) -> bool:
     """
-    Checks if the file at mp3_path has an album coover
-    :param mp3_path:
-    :return:
+    Checks if the file at file_path has an album coover
+    :param file_path: the path to the music file
+    :return: boolean expressing whether the file contains album art
     """
-    audio: File = File(mp3_path)
+    audio: File = File(file_path)
     try:
         if 'APIC:' in audio:
             apic: mutagen.id3.APIC = audio['APIC:']
@@ -262,7 +243,6 @@ def get_album_art(artist, title, select_index=0, return_all=False):
     Fetches max resolution album art(s) for track (artist and title specified) using Spotify API
     :param artist: artist
     :param title: title of track
-    :param access_token: Spotify access token
     :param select_index: which result to pick (by default the first)
     :param return_all: if set to True, function returns all max res album art
     :return: url(s) of the highest resolution album art for the track
@@ -270,7 +250,7 @@ def get_album_art(artist, title, select_index=0, return_all=False):
     # TODO: add soundcloud search as well if spotify comes up with no results.
     #  Soundcloud has it disabled
     artist, title = parse.quote_plus(artist), parse.quote_plus(title)
-    header = {'Authorization': 'Bearer ' + get_spotify_access_token(SPOTIFY_B64_AUTH_STR)}
+    header = {'Authorization': 'Bearer ' + get_spotify_access_token()}
     r = requests.get(f'https://api.spotify.com/v1/search?q={title}+artist:{artist}&type=track', headers=header)
     if return_all: return [item['album']['images'][0]['url'] for item in r.json()['tracks']['items']]
     return r.json()['tracks']['items'][select_index]['album']['images'][0]['url']
@@ -294,12 +274,11 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
         with open(img_path, 'rb') as bits:  # better than open(albumart, 'rb').read() ?
             image_data = bits.read()
     elif url:
-        url = url.replace(' ', '')
+        img_path = url = url.replace(' ', '')
         image_data = urlopen(url).read()
-        img_path = url
     elif copy_from:
+        other_audio = MP3(copy_from, ID3=mutagen.id3.ID3)
         try:
-            other_audio = MP3(copy_from, ID3=mutagen.id3.ID3)
             audio['APIC:'] = other_audio['APIC:']
             audio.save()
         except KeyError:
@@ -310,7 +289,7 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
                     audio['APIC:'] = v
                     audio.save()
                     unchanged = False
-            if unchanged:  print('That file is incompatible.')
+            if unchanged: print('That file is incompatible.')
         return
     else:
         easy_audio = EasyID3(mp3_path)
@@ -331,21 +310,21 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
             print(f'Album art not found for: {filename}')
             return False
 
-    if img_path.endswith('png'):
-        mime = 'image/png'
-    else:
-        mime = 'image/jpeg'
+    if img_path.endswith('png'): mime = 'image/png'
+    else: mime = 'image/jpeg'
+    data = io.BytesIO(image_data)
+    im = Image.open(data)
+    image_data = io.BytesIO()
+    im.save(image_data, optimize=True, format='JPEG')
     # image.desc = 'front cover'
-
     audio['APIC:'] = mutagen.id3.APIC(
         encoding=0,  # 3 is for utf-8
         mime=mime,  # image/jpeg or image/png
         type=3,  # 3 is for the cover image
-        # desc=u'Cover',
-        data=image_data
+        # desc=u'Album Cover',
+        data=image_data.getvalue()
     )
     audio.save()
-    return
 
 
 add_mp3_cover = add_album_cover = set_album_cover
@@ -436,7 +415,29 @@ def remove_covers(filename):
     audio.save()
 
 
+def optimize_cover(filename):
+    if has_album_art(filename):
+        audio = MP3(filename)
+        apic = audio['APIC:']
+        data = apic.data
+        data = io.BytesIO(data)
+        im = Image.open(data)
+        new_data = io.BytesIO()
+        im.save(new_data, optimize=True, format='JPEG')
+        if len(data.getvalue()) - len(new_data.getvalue()) > 0:
+            audio['APIC:'] = mutagen.id3.APIC(
+                encoding=0,  # 3 is for utf-8
+                mime='image/jpeg',  # image/jpeg or image/png
+                type=3,  # 3 is for the cover image
+                # desc=u'Cover',
+                data=new_data.getvalue()
+            )
+            audio.save()
+
+
 if __name__ == '__main__':
-    audio_mp3 = MP3(r"C:\Users\maste\Documents\MEGAsync\Music\Moguai, Dimitri Vegas & Like Mike - Mammoth.mp3")
-    covers = [audio_mp3[key].data for key in audio_mp3.keys() if key.startswith('APIC')]
-    print(covers)
+    os.chdir(config['MUSIC_LOCATION'])
+    for file in glob('*.mp3'):
+        try: optimize_cover(file)
+        except mutagen.MutagenError:
+            pass
