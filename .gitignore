@@ -3,3 +3,4 @@ config.txt
 __pycache__
 ffmpeg.log
 .env
+config.json

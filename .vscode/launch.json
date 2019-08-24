@@ -8,7 +8,7 @@
             "name": "Python: cli.py",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceRoot}/main.py",
+            "program": "${workspaceRoot}/cli.py",
             "console": "integratedTerminal"
         },
         {

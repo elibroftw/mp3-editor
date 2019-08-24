@@ -20,6 +20,11 @@ while music_directory == '' or not os.path.exists(music_directory):
     music_directory = filedialog.askdirectory(title='Select Music Directory')
     root.withdraw()
 
+music_directory = music_directory.replace('\\', '/')
+if config.get('MUSIC_LOCATION', '') != music_directory:
+    config['MUSIC_LOCATION'] = music_directory
+    with open('config.json', 'w') as json_file: json.dump(config, json_file, indent=4)
+
 
 def individual_select(filename):
     global music_directory

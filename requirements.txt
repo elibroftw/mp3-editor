@@ -1,4 +1,5 @@
 environs
+json
 GitPython
 mutagen
 Pillow

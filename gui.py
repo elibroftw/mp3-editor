@@ -51,7 +51,11 @@ class StartPage(tk.Frame):
         global music_directory
         while music_directory == '' or not os.path.exists(music_directory):
             music_directory = filedialog.askdirectory(title='Select Music Directory')
-        chdir(music_directory)
+        music_directory = music_directory.replace('\\', '/')
+        if config.get('MUSIC_LOCATION', '') != music_directory:
+            config['MUSIC_LOCATION'] = music_directory
+            with open('config.json', 'w') as json_file: json.dump(config, json_file, indent=4)
+        chdir(music_directory)       
         tk.Frame.__init__(self, parent, bg='#141414')
         self.controller = controller
 
@@ -72,6 +76,8 @@ class StartPage(tk.Frame):
         
         button5 = Button(self, text='Search for album covers', bg=bbg, activebackground=babg, command=self.search_for_album_covers)
         button5.pack(pady=10)
+        
+        self.bindings()
         # self.focus()
 
     def change_directory(self):
@@ -111,11 +117,11 @@ class StartPage(tk.Frame):
         for i in range(1, 6): self.unbind(str(i))
 
     def bindings(self):
-        self.bind('1', lambda _: self.change_directory())
-        self.bind('2', lambda _: self.set_missing_metadata())
-        self.bind('3', lambda _: self.select_individual_track())        
-        self.bind('4', lambda _: self.view_music_files())
-        self.bind('5', lambda _: self.search_for_album_covers())
+        self.controller.bind('1', lambda _: self.change_directory())
+        self.controller.bind('2', lambda _: self.set_missing_metadata())
+        self.controller.bind('3', lambda _: self.select_individual_track())        
+        self.controller.bind('4', lambda _: self.view_music_files())
+        self.controller.bind('5', lambda _: self.search_for_album_covers())
         self.controller.bind('<Escape>', lambda _: self.quit())
         self.controller.bind('<q>', lambda _: self.quit())
         self.controller.bind('<Q>', lambda _: self.quit())
@@ -298,7 +304,7 @@ class AlbumCoverSearcher(tk.Frame):
         button1.pack(in_=top_stuff, side=tk.LEFT)
 
         label1 = Label(self, text='Search For Album Art', bg='#141414', fg='white', font=LARGE_FONT)
-        label1.pack(in_=top_stuff, side=tk.RIGHT, padx=150)
+        label1.pack(in_=top_stuff, side=tk.RIGHT, padx=90)
 
         search_stuff = tk.Frame(self, bg='#141414')
         search_stuff.pack(side=tk.TOP)      

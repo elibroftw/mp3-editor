@@ -1,19 +1,19 @@
 from pprint import pprint
 from time import time
+import base64
+from glob import glob
+import io
+import os
+from os import system
+import subprocess
+from urllib import parse
+from urllib.request import urlopen
 
-try:
-    import base64
+try:   
+    import json
     import shlex
-    from glob import glob
-    import io
-    import os
-    from os import system
-    import subprocess
     import platform
     import pathlib
-    from urllib import parse
-    from urllib.request import urlopen
-    
     from mutagen import File
     from mutagen.easyid3 import EasyID3
     import mutagen.id3
@@ -21,7 +21,6 @@ try:
     from mutagen.mp3 import MP3
     from PIL import Image
     import requests
-    
 except ImportError as e:
     print(e)
     print('Press Enter to quit...')
@@ -66,16 +65,8 @@ def get_spotify_access_token():
 
 
 try:
-    # load the config values
-    with open('config.txt') as f:
-        for line in f.read().splitlines():
-            space_index = line.index(' ')  # the file is formatted: VARIABLE = KEY
-            varValue = line[space_index + 3:]
-            if varValue.isdigit():
-                varValue = int(varValue)
-            else:
-                varValue = float(varValue) if varValue.replace('.', '', 1).isdigit() else varValue
-            config[line[:space_index]] = varValue
+    with open('config.json') as json_file:
+        config: dict = json.load(json_file)
 
     SPOTIFY_AUTH_STR = f"{config['SPOTIFY_CLIENT_ID']}:{config['SPOTIFY_SECRET']}"
     SPOTIFY_B64_AUTH_STR = base64.urlsafe_b64encode(SPOTIFY_AUTH_STR.encode()).decode()
