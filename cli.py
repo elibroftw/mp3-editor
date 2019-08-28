@@ -40,7 +40,7 @@ def individual_select(filename):
             audio.add_tags()
             audio = EasyID3(filename)
         try:
-            sub_menu_user_choice = int(input())
+            sub_menu_user_choice = int(input('Enter an option: '))
             if sub_menu_user_choice == 1:
                 add_simple_meta(filename)
                 print('Simple metadata set')
@@ -121,12 +121,10 @@ def individual_select(filename):
             elif sub_menu_user_choice == 14:
                 audio_mp3 = MP3(filename)
                 covers = [audio_mp3[key].data for key in audio_mp3.keys() if key.startswith('APIC')]
-                image_selector.main(image_bits=covers)
+                image_selector.main(image_bits=covers, artist=', '.join(audio['artist']), track=audio['title'][0])
             else:
                 print(individual_select_menu_text)
-            if 0 < sub_menu_user_choice < 16:
-                print('Enter an option')
-            else: print('Please enter an integer from 1 to 15')
+            if 0 > sub_menu_user_choice or sub_menu_user_choice > 16: print('Please enter an integer from 1 to 15')
         except ValueError: print('Please enter an integer from 1 to 15')
 
 
@@ -136,7 +134,7 @@ def main():
     output_intro = True
     while True:
         if output_intro:
-            print('What would you like to do?')
+            print('Welcome to Metadata Editor by Elijah Lopez')
             print(f'1. Change Directory (currently: {music_directory})')
             print('2. Set metadata for tracks with missing metadata (includes album art)')
             print('3. Select an individual track')
@@ -144,7 +142,7 @@ def main():
             print('5. Search for album covers')  # make menu better
             print('6. Exit')
         try:
-            user_choice = int(input())
+            user_choice = int(input('Enter an option: '))
         except ValueError:
             user_choice = 0
         output_intro = True
@@ -166,8 +164,8 @@ def main():
             files = glob('*.mp3')
             for i, file in enumerate(files): print(f'{i + 1}. {file}')
 
-            print('Enter a valid integer to select the respective file')
-            print('Entering anything else will let you go back to the main menu')
+            print('Enter an integer to select the corresponding file')
+            print('Entering anything else will take you to the main menu')
 
             try: individual_select(files[int(input()) - 1])
             except (ValueError, IndexError): pass

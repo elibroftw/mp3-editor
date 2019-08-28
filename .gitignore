@@ -4,3 +4,4 @@ __pycache__
 ffmpeg.log
 .env
 config.json
+test.py

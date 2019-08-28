@@ -427,8 +427,4 @@ def optimize_cover(filename):
 
 
 if __name__ == '__main__':
-    os.chdir(config['MUSIC_LOCATION'])
-    for file in glob('*.mp3'):
-        try: optimize_cover(file)
-        except mutagen.MutagenError:
-            pass
+    pass
