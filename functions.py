@@ -8,9 +8,9 @@ from os import system
 import subprocess
 from urllib import parse
 from urllib.request import urlopen
+import json
 
 try:   
-    import json
     import shlex
     import platform
     import pathlib
@@ -32,7 +32,7 @@ out, err = p.communicate()
 ar = b"'ffmpeg' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n"
 if ar == err:
     print('FFMPEG NOT ON PATH')
-    input('Press enter to go to FFMPEG website and how to add to path...')
+    input('Press enter to go to FFMPEG website and learn how to add to path...')
     import webbrowser
     webbrowser.open('https://ffmpeg.org/download.html')
     webbrowser.open('http://blog.gregzaal.com/how-to-install-ffmpeg-on-windows/')
@@ -42,7 +42,6 @@ if ar == err:
 config = {}
 spotify_access_token_creation = 0
 spotify_access_token = ''
-# TODO: don't change album cover if its already the album cover
 
 
 def copy(text):
@@ -73,7 +72,7 @@ try:
     LASTFM_API = config['LASTFM_API']
     LASTFM_SECRET = config['LASTFM_SECRET']
     print('LASTFM API keys loaded')
-
+    # TODO: support multiple directories
     # this is for future when I get a Soundcloud api key
     # SOUNDCLOUD_CLIENT_ID = config['SOUNDCLOUD_CLIENT_ID']
     # SOUNDCLOUD_CLIENT_SECRET = config['SOUNDCLOUD_CLIENT_SECRET']

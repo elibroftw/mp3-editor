@@ -136,9 +136,9 @@ def main():
         if output_intro:
             print('Welcome to Metadata Editor by Elijah Lopez')
             print(f'1. Change Directory (currently: {music_directory})')
-            print('2. Set metadata for tracks with missing metadata (includes album art)')
+            print('2. Auto-set metadata for files with missing metadata and album art')
             print('3. Select an individual track')
-            print('4. View mp3 files in directory (and then select)')
+            print('4. View mp3 files in directory')
             print('5. Search for album covers')  # make menu better
             print('6. Exit')
         try:

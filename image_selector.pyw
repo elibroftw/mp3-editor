@@ -28,6 +28,7 @@ toaster = ToastNotifier()  # maybe do two?
 # def display_images(image_bits):
 #     images = [Image.open(io.BytesIO(image)) for image in image_bits]
 
+
 def main(image_urls=[], artist='', track='', image_bits=[]):
     global current_image_index
     if __name__ == '__main__':
