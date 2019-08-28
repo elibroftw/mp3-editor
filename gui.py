@@ -5,6 +5,7 @@ from os import chdir
 from functions import *
 import image_selector
 from image_selector import center
+from contextlib import suppress
 
 LARGE_FONT= ('Verdana', 12)
 music_directory = config.get('MUSIC_LOCATION', '')
@@ -12,7 +13,8 @@ music_directory = config.get('MUSIC_LOCATION', '')
 bbg = '#0088ff'
 babg = '#00bbff'  # button active background
 # TODO: make button text larger
-# TODO: indivual select
+# TODO: individual select
+
 
 class MainGUI(tk.Tk):
 
@@ -33,7 +35,6 @@ class MainGUI(tk.Tk):
         #     frame.grid(row=0, column=0, sticky="nsew")
         self.title('Music Metadata Editor by Elijah Lopez')
         self.show_frame(StartPage)
-
 
     def show_frame(self, cont, kwargs={}):
         if cont not in self.frames:
@@ -65,7 +66,7 @@ class StartPage(tk.Frame):
         button1 = Button(self, text=f'Change Directory', bg=bbg, activebackground=babg, command=self.change_directory)
         button1.pack(pady=10)
 
-        button2 = Button(self, text='Autoset metadata for files with missing metadata and album art', bg=bbg, activebackground=babg, command=self.set_missing_metadata)
+        button2 = Button(self, text='Auto set metadata for files with missing metadata and album art', bg=bbg, activebackground=babg, command=self.set_missing_metadata)
         button2.pack(pady=10)
 
         button3 = Button(self, text='Select an individual track', bg=bbg, activebackground=babg, command=self.select_individual_track)
@@ -92,24 +93,25 @@ class StartPage(tk.Frame):
             if diff > 0: self.label1.configure(text=f'Working Directory: ...{music_directory[diff:]}')
             else: self.label1.configure(text=f'Working Directory: {music_directory}')
 
-    def set_missing_metadata(self):
+    @staticmethod
+    def set_missing_metadata():
         for file in glob('*.mp3'): add_simple_meta(file)
         # TODO: status message
 
     def select_individual_track(self):
         file = filedialog.askopenfilename(initialdir=f'{music_directory}', title='Select track', filetypes=[('Audio', '*.mp3')])
         if file:
-            self.controller.bind('<Escape>', lambda _: self.controller.show_frame(StartPage))
+            self.bind_on_frame_change()
             self.unbind_numbers()
-            self.controller.show_frame(InvidualTrackPage, {'filename': file})
+            self.controller.show_frame(IndividualTrackPage, {'filename': file})
 
     def view_music_files(self):
-        self.controller.bind('<Escape>', lambda _: self.controller.show_frame(StartPage))
+        self.bind_on_frame_change()
         self.unbind_numbers()
         self.controller.show_frame(MusicFilesPage, {'directory': music_directory})
 
     def search_for_album_covers(self):
-        self.controller.bind('<Escape>', lambda _: self.controller.show_frame(StartPage))
+        self.bind_on_frame_change()
         self.unbind_numbers()
         self.controller.show_frame(AlbumCoverSearcher)
 
@@ -127,9 +129,13 @@ class StartPage(tk.Frame):
         self.controller.bind('<Q>', lambda _: self.quit())
         self.controller.unbind('<Return>')
 
-    def tkraise(self, aboveThis=None):
+    def bind_on_frame_change(self):
+        self.controller.bind('<Escape>', lambda _: self.controller.show_frame(StartPage))
+        self.controller.bind('<Alt-Left>', lambda _: self.controller.show_frame(StartPage))
+
+    def tkraise(self, above_this=None):
         self.bindings()
-        return super().tkraise(aboveThis=aboveThis)
+        return super().tkraise(aboveThis=above_this)
     
 
 class MusicFilesPage(tk.Frame):
@@ -137,41 +143,49 @@ class MusicFilesPage(tk.Frame):
     def __init__(self, parent, controller, kwargs):
         tk.Frame.__init__(self, parent, width=200, height=400, bg='#141414')
         # controller.geometry(f'{controller.winfo_width()}x250')
-        center(controller)
         self.old_w, self.old_h = self.winfo_reqwidth(), self.winfo_reqheight()
         self.controller = controller
         self.directory = kwargs['directory']
 
+        controller.geometry(f'{app.winfo_screenwidth() // 3}x{app.winfo_screenheight() // 3}')
+        center(controller)
+
         top_stuff = tk.Frame(self, bg='#141414')
         top_stuff.pack(side=tk.TOP, pady=20)
-        
+        for i in range(1, 10): top_stuff.columnconfigure(i, minsize=40)
+
         button1 = tk.Button(self, text='Back', bg=bbg, activebackground=babg, command=lambda: controller.show_frame(StartPage))
-        button1.pack(in_=top_stuff, side=tk.LEFT)
-        
-        label = tk.Label(self, text=f'Music files in .../{os.path.basename(self.directory)}', font=LARGE_FONT, bg='#141414', fg='white')
-        label.pack(in_=top_stuff, padx=140, side=tk.RIGHT)
+        button1.grid(in_=top_stuff, row=0, column=0)
+
+        label = tk.Label(self, text=f"Music files in {'/'.join(self.directory.split('/')[:4])}", font=LARGE_FONT, bg='#141414', fg='white')
+        label.grid(in_=top_stuff, row=0, column=5)
 
         self.files = glob(f'{self.directory}/*.mp3')
-        
-        self.listbox = Listbox(self, width=200, bg='#141414', fg='white')
+
+        listbox_height = int(app.winfo_screenheight() * 0.0133)
+        self.listbox = Listbox(self, width=200, height=listbox_height, bg='#141414', fg='white')
         self.listbox.pack()
+        self.listbox.focus()
         for file in self.files:
             self.listbox.insert(tk.END, os.path.basename(file))
 
         button2 = tk.Button(self, text='Select File', bg=bbg, activebackground=babg, command=self.select_individual_track)
         button2.pack(pady=20)
 
+        controller.bind('<Return>', lambda _: self.select_individual_track())
+
     def select_individual_track(self):
-        file = self.files[self.listbox.curselection()[0]]
-        self.controller.bind('<Escape>', lambda _: self.controller.show_frame(MusicFilesPage, {'directory': self.directory}))
-        if file: self.controller.show_frame(InvidualTrackPage, {'filename': file, 'previous_page': MusicFilesPage, 'directory': self.directory})
+        with suppress(IndexError):
+            file = self.files[self.listbox.curselection()[0]]
+            self.controller.bind('<Escape>', lambda _: self.controller.show_frame(MusicFilesPage, {'directory': self.directory}))
+            self.controller.bind('<Alt-Left>', lambda _: self.controller.show_frame(MusicFilesPage, {'directory': self.directory}))
+            if file: self.controller.show_frame(IndividualTrackPage, {'filename': file, 'previous_page': MusicFilesPage, 'directory': self.directory})
 
     def resize(self):
         self.controller.geometry(f'{self.oldw}x{self.oldh}')
 
 
-
-class InvidualTrackPage(tk.Frame):
+class IndividualTrackPage(tk.Frame):
 
     def __init__(self, parent, controller, kwargs):
         tk.Frame.__init__(self, parent, bg='#141414')
@@ -179,8 +193,9 @@ class InvidualTrackPage(tk.Frame):
         self.previous_page = kwargs.get('previous_page', StartPage)
         self.controller = controller
         self.old_w, self.old_h = self.controller.winfo_width(), self.controller.winfo_height()
-        self.controller.geometry(f'{self.old_w}x{int(self.old_h * 2)}')
-        center(self.controller)
+        # controller.geometry(f'{self.old_w}x{int(self.old_h * 2)}')
+        controller.geometry(f'{int(self.old_w*1.1)}x{int(app.winfo_screenheight() / 1.8)}')
+        center(controller)
         self.kwargs = kwargs
         try: self.audio = EasyID3(self.filename)
         except mutagen.id3.ID3NoHeaderError:
@@ -188,11 +203,17 @@ class InvidualTrackPage(tk.Frame):
             self.audio.add_tags()
             self.audio = EasyID3(self.filename)
 
-        label = tk.Label(self, text=os.path.basename(self.filename), font=LARGE_FONT, bg='#141414', fg='white', highlightbackground='#303030', highlightcolor='blue')
-        label.pack(pady=20, padx=10)
+        top_stuff = tk.Frame(self, bg='#141414')
+        top_stuff.pack(side=tk.TOP, pady=20)
+        label_text = os.path.basename(self.filename)
+        for i in range(1, 10): top_stuff.columnconfigure(i, minsize=75 - len(label_text))
+        label = tk.Label(self, text=label_text, font=LARGE_FONT, bg='#141414', fg='white', highlightbackground='#303030', highlightcolor='blue')
+        label.grid(in_=top_stuff, row=0, column=5)
+        # label.pack(pady=20, padx=10)
 
         button1 = tk.Button(self, text='Back', bg=bbg, activebackground=babg, command=self.back)
-        button1.pack(pady=10, padx=10)
+        # button1.pack(pady=10, padx=10)
+        button1.grid(in_=top_stuff, row=0, column=0)
 
         button2 = tk.Button(self, text='Auto set metadata and album art', bg=bbg, activebackground=babg, command=self.auto_set_metadata)
         button2.pack(pady=10, padx=10)
@@ -342,8 +363,10 @@ class AlbumCoverSearcher(tk.Frame):
         else: self.label2.configure(text='No album art found :(')
 
 
-app = MainGUI()
-center(app)
-# style = Style()
-# style.configure('TButton', background='#141414')
-app.mainloop()
+if __name__ == '__main__':
+    app = MainGUI()
+    app.geometry(f'{app.winfo_screenwidth() // 3}x{app.winfo_screenheight() // 3}')
+    center(app)
+    # style = Style()
+    # style.configure('TButton', background='#141414')
+    app.mainloop()

@@ -65,14 +65,14 @@ def get_spotify_access_token():
 
 
 try:
-    with open('config.json') as json_file:
-        config: dict = json.load(json_file)
-
+    with open('config.json') as config_file:
+        config: dict = json.load(config_file)
     SPOTIFY_AUTH_STR = f"{config['SPOTIFY_CLIENT_ID']}:{config['SPOTIFY_SECRET']}"
     SPOTIFY_B64_AUTH_STR = base64.urlsafe_b64encode(SPOTIFY_AUTH_STR.encode()).decode()
-
+    print('Spotify API keys loaded')
     LASTFM_API = config['LASTFM_API']
     LASTFM_SECRET = config['LASTFM_SECRET']
+    print('LASTFM API keys loaded')
 
     # this is for future when I get a Soundcloud api key
     # SOUNDCLOUD_CLIENT_ID = config['SOUNDCLOUD_CLIENT_ID']
