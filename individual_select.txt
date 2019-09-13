@@ -7,9 +7,9 @@
 7. Set album cover (auto, url, local image, from another file, manual search)
 8. Set genre (not yet implemented)
 9. Set year (not yet implemented)
-10. Rename file
-11. Print properties
-12. Trim audio
-13. Exit
-14. View album covers
+10. View album covers
+11. Rename file
+12. Print properties
+13. Trim audio
+14. Exit
 15. Reprint Text

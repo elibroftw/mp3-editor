@@ -1,5 +1,11 @@
-# MP3 Editor
-My own mp3 editor made in python that can automatically set metadata and album cover given the filename.
+# Music File Editor
+My own Music File editor made in python that can automatically set metadata and album cover given the filename.
+
+# Features
+- Metadata setter (auto, manual)
+- Album art setter (auto [needs spotify API key], manual)
+- Trimming options
+- View album art
 
 # How to use
 - pip install -r requirements.txt

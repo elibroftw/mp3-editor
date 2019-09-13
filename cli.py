@@ -31,7 +31,7 @@ def individual_select(filename):
     with open(starting_directory+'/individual_select.txt') as f:
         individual_select_menu_text = f.read()
     print('You selected:', filename)
-    print(individual_select_menu_text, end='')
+    print(individual_select_menu_text)
     on_menu = True
     while on_menu:
         try: audio = EasyID3(filename)
@@ -101,27 +101,26 @@ def individual_select(filename):
             elif sub_menu_user_choice == 9:
                 # set_year(audio, input('Enter year (YYYY):)
                 pass
-            elif sub_menu_user_choice == 10:  # TODO: Rename file
+            elif sub_menu_user_choice == 10:
+                audio_mp3 = MP3(filename)
+                covers = [audio_mp3[key].data for key in audio_mp3.keys() if key.startswith('APIC')]
+                image_selector.main(image_bits=covers, artist=', '.join(audio['artist']), track=audio['title'][0])
+            elif sub_menu_user_choice == 11:  # TODO: Rename file
                 print('Enter new file name (with extension)')
                 new_filename = path.dirname(filename) + '/' + input()
                 if not new_filename.count('.'): new_filename += '.mp3'
                 rename(filename, new_filename)
                 print('file name changed from ', pathlib.Path(filename).name, 'to', pathlib.Path(new_filename).name)
                 filename = new_filename
-            elif sub_menu_user_choice == 11:
+            elif sub_menu_user_choice == 12:
                 for k, v in audio.items():
                     print(k, ':', v)
                 print('album cover :', has_album_art(filename))
-            elif sub_menu_user_choice == 12:
+            elif sub_menu_user_choice == 13:
                 start = int(input('Enter start time (seconds): '))
                 end = int(input('Enter end time (seconds): '))
                 trim(filename, start, end)
-            elif sub_menu_user_choice == 13:
-                on_menu = False
-            elif sub_menu_user_choice == 14:
-                audio_mp3 = MP3(filename)
-                covers = [audio_mp3[key].data for key in audio_mp3.keys() if key.startswith('APIC')]
-                image_selector.main(image_bits=covers, artist=', '.join(audio['artist']), track=audio['title'][0])
+            elif sub_menu_user_choice == 14: on_menu = False
             else:
                 print(individual_select_menu_text)
             if 0 > sub_menu_user_choice or sub_menu_user_choice > 16: print('Please enter an integer from 1 to 15')
