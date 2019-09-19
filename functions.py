@@ -438,6 +438,10 @@ def fix_cover(audio: File):
             audio['APIC:'] = audio.pop(k)
             audio.save()
             break
+
+
+def get_bitrate(audio: File):
+    return audio.info.bitrate
             
 
 if __name__ == '__main__':

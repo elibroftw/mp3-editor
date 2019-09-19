@@ -112,14 +112,14 @@ def individual_select(filename):
             elif sub_menu_user_choice == 12:
                 for k, v in audio.items():
                     print(k, ':', v)
+                print('bitrate:', get_bitrate(audio))
                 print('album cover :', has_album_cover(audio))
             elif sub_menu_user_choice == 13:
                 start = int(input('Enter start time (seconds): '))
                 end = int(input('Enter end time (seconds): '))
                 trim(filename, start, end)
             elif sub_menu_user_choice == 14: on_menu = False
-            else:
-                print(individual_select_menu_text)
+            else: print(individual_select_menu_text)
             if 0 > sub_menu_user_choice or sub_menu_user_choice > 16: print('Please enter an integer from 1 to 15')
         except ValueError: print('Please enter an integer from 1 to 15')
 
