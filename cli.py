@@ -149,7 +149,7 @@ def main():
                 chdir(music_directory)
                 print('Directory changed to', music_directory)
         elif user_choice == 2:
-            for file in tqdm(glob('*.mp3')):
+            for file in tqdm(glob('*.mp3'), desc='Setting metadata'):
                 add_simple_meta(file)
             print('Metadata for all tracks set')
         elif user_choice == 3:
