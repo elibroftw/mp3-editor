@@ -74,7 +74,7 @@ def individual_select(filename):
                     elif album_art_choice == 2:
                         if set_album_cover(filename, url=input('Enter url: ')): print('Album cover set')
                     elif album_art_choice == 3:
-                        if set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album art', filetypes=[('Image', '*.jpg *.jpeg *.png')])): print(f'Album cover set')
+                        if set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album cover', filetypes=[('Image', '*.jpg *.jpeg *.png')])): print(f'Album cover set')
                         root.withdraw()
                     elif album_art_choice == 4:
                         if not set_album_cover(filename, copy_from=filedialog.askopenfilename(initialdir=f'{music_directory}', title='Select 2nd track', filetypes=[('Audio', '*.mp3')])):
@@ -89,7 +89,7 @@ def individual_select(filename):
                             image_selector.main(results, artist=search_artist, track=search_title)
                             url = os.environ.pop('SELECTED_URL', None)
                             if url and set_album_cover(filename, url=url): print('Album cover set')
-                        else: print('No album art found :(')
+                        else: print('No album covers found :(')
                 except ValueError:
                     pass
             elif sub_menu_user_choice == 8:
@@ -132,7 +132,7 @@ def main():
         if output_intro:
             print('Welcome to Metadata Editor by Elijah Lopez')
             print(f'1. Change Directory (currently: {music_directory})')
-            print('2. Auto-set metadata for files with missing metadata and album art')
+            print('2. Auto-set missing metadata and album covers')
             print('3. Select an individual track')
             print('4. View mp3 files in directory')
             print('5. Search for album covers')  # make menu better
@@ -175,7 +175,7 @@ def main():
                 if url:
                     if copy(url): print('Copied url to clipboard!')
                     else: print(url)
-            else: print('No album art found :(')
+            else: print('No album covers found :(')
         elif user_choice == 6: return
         else:
             output_intro = False
