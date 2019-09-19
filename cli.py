@@ -159,10 +159,8 @@ def main():
         elif user_choice == 4:
             files = glob('*.mp3')
             for i, file in enumerate(files): print(f'{i + 1}. {file}')
-
             print('Enter an integer to select the corresponding file')
-            print('Entering anything else will take you to the main menu')
-
+            print('Entering anything else will take you back to the main menu')
             try: individual_select(files[int(input()) - 1])
             except (ValueError, IndexError): pass
         elif user_choice == 5:
