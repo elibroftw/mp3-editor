@@ -254,9 +254,9 @@ def search_album_art(artist, title, select_index=0, return_all=False):
     return r.json()['tracks']['items'][select_index]['album']['images'][0]['url']
 
 
-def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artist='', select_index=0):
-    audio = MP3(mp3_path, ID3=mutagen.id3.ID3)
-    filename = pathlib.Path(mp3_path).name
+def set_album_cover(file_path, img_path='', url='', copy_from='', title='', artist='', select_index=0):
+    audio = MP3(file_path, ID3=mutagen.id3.ID3)
+    filename = pathlib.Path(file_path).name
     try:
         audio.add_tags()
     except mutagen.id3.error:
@@ -289,16 +289,16 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
                     unchanged = False
             if unchanged: print('That file is incompatible.')
     else:
-        easy_audio = EasyID3(mp3_path)
+        easy_audio = EasyID3(file_path)
         if 'title' in easy_audio and not title:
             title = easy_audio['title'][0]
         else:
-            add_simple_meta(mp3_path)
+            add_simple_meta(file_path)
             title = filename[filename.index('-') + 2:-4]
         if 'artist' in easy_audio and not artist:
             artist = easy_audio['artist'][0]
         else:
-            add_simple_meta(mp3_path)
+            add_simple_meta(file_path)
             artist = get_artist(filename)
         try:
             img_path = search_album_art(artist, title, select_index=select_index)

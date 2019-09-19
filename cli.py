@@ -34,11 +34,13 @@ def individual_select(filename):
     print(individual_select_menu_text)
     on_menu = True
     while on_menu:
-        try: audio = EasyID3(filename)
+        try:
+            easy_audio = EasyID3(filename)
+            audio = File(filename)
         except mutagen.id3.ID3NoHeaderError:
             audio = mutagen.File(filename, easy=True)
             audio.add_tags()
-            audio = EasyID3(filename)
+            easy_audio = EasyID3(filename)
         try:
             sub_menu_user_choice = int(input('Enter an option: '))
             if sub_menu_user_choice == 1:
@@ -48,18 +50,18 @@ def individual_select(filename):
                 add_simple_meta(filename, override=True)
                 print('Simple metadata set')
             elif sub_menu_user_choice == 3:
-                set_title(audio, input('Enter title: '))
+                set_title(easy_audio, input('Enter title: '))
                 print('Title set')
             elif sub_menu_user_choice == 4:
                 artists = input('Enter artist(s) (comma separated eg. "Elijah, Lopez"): ')
                 if ', ' in artists: artists = artists.split(', ')
-                set_artists(audio, artists)
+                set_artists(easy_audio, artists)
                 print('Artist(s) set')
             elif sub_menu_user_choice == 5:
-                set_album(audio, input('Enter album: '))
+                set_album(easy_audio, input('Enter album: '))
                 print('Album title set')
             elif sub_menu_user_choice == 6:
-                set_album_artist(audio, input('Enter album artist: '))
+                set_album_artist(easy_audio, input('Enter album artist: '))
             elif sub_menu_user_choice == 7:
                 print('1. Auto')
                 print('2. Url')
@@ -99,9 +101,8 @@ def individual_select(filename):
                 # set_year(audio, input('Enter year (YYYY):)
                 pass
             elif sub_menu_user_choice == 10:
-                audio_mp3 = MP3(filename)
-                covers = [audio_mp3[key].data for key in audio_mp3.keys() if key.startswith('APIC')]
-                image_selector.main(image_bits=covers, artist=', '.join(audio['artist']), track=audio['title'][0])
+                covers = [audio[key].data for key in audio.keys() if key.startswith('APIC')]
+                image_selector.main(image_bits=covers, artist=', '.join(easy_audio['artist']), track=easy_audio['title'][0])
             elif sub_menu_user_choice == 11:  # TODO: Rename file
                 print('Enter new file name (with extension)')
                 new_filename = path.dirname(filename) + '/' + input()
@@ -110,10 +111,10 @@ def individual_select(filename):
                 print('file name changed from ', pathlib.Path(filename).name, 'to', pathlib.Path(new_filename).name)
                 filename = new_filename
             elif sub_menu_user_choice == 12:
-                for k, v in audio.items():
+                for k, v in easy_audio.items():
                     print(k, ':', v)
-                print('bitrate:', get_bitrate(audio))
                 print('album cover :', has_album_cover(audio))
+                print('bitrate:', get_bitrate(audio))
             elif sub_menu_user_choice == 13:
                 start = int(input('Enter start time (seconds): '))
                 end = int(input('Enter end time (seconds): '))
