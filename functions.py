@@ -112,9 +112,9 @@ def set_album(audio: EasyID3, album):
 
 def set_album_artist(audio: EasyID3, album_artist):
     """
-    Sets an album artist for an EasyID3 object
+    Sets an album coverist for an EasyID3 object
     :param audio: EasyID3
-    :param album_artist: name of the album artist
+    :param album_artist: name of the album coverist
     """
     audio['albumartist'] = album_artist
     audio.save()
@@ -165,7 +165,7 @@ def add_simple_meta(file_path, artist='', title='', album='', albumartist='', ov
     :param artist: given artist name
     :param title: given title name
     :param album: given album name
-    :param albumartist: given album artist
+    :param albumartist: given album coverist
     :param override: if True, all of the metadata is overridden
     :return: True or False depending on whether audio file was changed or not
     """
@@ -173,7 +173,7 @@ def add_simple_meta(file_path, artist='', title='', album='', albumartist='', ov
     filename = pathlib.Path(file_path).name  # or filename = file_path[:-4]
     try:
         if (not override and audio.get('title') and audio.get('artist')
-            and audio.get('albumartist') and has_album_art(file_path)): return False
+            and audio.get('albumartist') and has_album_cover(file_path)): return False
         if artist == '': artist = get_artist(filename)
         else:
             if artist.count(' , '): artist.split(' , ')
@@ -195,7 +195,7 @@ def add_simple_meta(file_path, artist='', title='', album='', albumartist='', ov
                 if albumartist == '': audio['albumartist'] = artist
                 else: audio['albumartist'] = albumartist
         audio.save()
-        if not has_album_art(file_path): set_album_cover(file_path)
+        if not has_album_cover(file_path): set_album_cover(file_path)
         return True
     except ValueError:
         print('Error with', filename)
@@ -205,14 +205,16 @@ def add_simple_meta(file_path, artist='', title='', album='', albumartist='', ov
 set_simple_meta = add_simple_meta
 
 
-def has_album_art(file_path) -> bool:
+def has_album_cover(audio) -> bool:
     """
-    Checks if the file at file_path has an album coover
-    :param file_path: the path to the music file
-    :return: boolean expressing whether the file contains album art
+    Checks if the file has an album cover
+    Also fixes album cover key + Encoding
+    :param audio: Either file path or audio object
+    :return: boolean expressing whether the file contains album cover
     """
-    audio: File = File(file_path)
+    if type(audio) == str: audio: File = File(audio)
     try:
+        fix_cover(audio)
         if 'APIC:' in audio:
             apic: mutagen.id3.APIC = audio['APIC:']
             if apic.encoding != Encoding.LATIN1:
@@ -220,22 +222,28 @@ def has_album_art(file_path) -> bool:
                 audio['APIC:'] = apic
                 audio.save()
             return True
-        return False
-    except KeyError:
-        audio.add_tags()
+    except KeyError: audio.add_tags()
+    return False
 
 
-has_mp3_cover = has_album_cover = has_album_art
+def retrieve_album_art(audio: MP3):
+    apics = [k for k in audio if k.startswith('APIC')]
+    if apics: return apics[0]
+    return None
 
 
-def get_album_art(artist, title, select_index=0, return_all=False):
+get_album_art = retrieve_album_art
+
+
+def search_album_art(artist, title, select_index=0, return_all=False):
+    # TODO: rename to search_album_art
     """
-    Fetches max resolution album art(s) for track (artist and title specified) using Spotify API
+    Fetches max resolution album cover(s) for track (artist and title specified) using Spotify API
     :param artist: artist
     :param title: title of track
     :param select_index: which result to pick (by default the first)
-    :param return_all: if set to True, function returns all max res album art
-    :return: url(s) of the highest resolution album art for the track
+    :param return_all: if set to True, function returns all max res album cover
+    :return: url(s) of the highest resolution album cover for the track
     """
     # TODO: add soundcloud search as well if spotify comes up with no results.
     #  Soundcloud has it disabled
@@ -255,10 +263,10 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
         pass
     if title and artist:
         try:
-            img_path = get_album_art(artist, title)
+            img_path = search_album_art(artist, title)
             image_data = urlopen(img_path).read()
         except (KeyError, ValueError, IndexError):
-            print(f'Album art not found for: {filename}')
+            print(f'Album cover not found for: {filename}')
             return False
     elif img_path:
         with open(img_path, 'rb') as bits:  # better than open(albumart, 'rb').read() ?
@@ -280,7 +288,6 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
                     audio.save()
                     unchanged = False
             if unchanged: print('That file is incompatible.')
-        return
     else:
         easy_audio = EasyID3(mp3_path)
         if 'title' in easy_audio and not title:
@@ -294,10 +301,9 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
             add_simple_meta(mp3_path)
             artist = get_artist(filename)
         try:
-            img_path = get_album_art(artist, title, select_index=select_index)
+            img_path = search_album_art(artist, title, select_index=select_index)
             image_data = urlopen(img_path).read()
         except (KeyError, ValueError, IndexError):
-            print(f'Album art not found for: {filename}')
             return False
 
     if img_path.endswith('png'): mime = 'image/png'
@@ -315,6 +321,7 @@ def set_album_cover(mp3_path, img_path='', url='', copy_from='', title='', artis
         data=image_data.getvalue()
     )
     audio.save()
+    return True
 
 
 add_mp3_cover = add_album_cover = set_album_cover
@@ -386,29 +393,24 @@ def set_genre(filename, genres=None):
     return True
 
 
-def get_genre(filename):
-    audio = MP3(filename)
+def get_genre(audio: MP3):
     return audio.get('TCON')
 
 
 # audio[u"USLT::'eng'"] = (USLT(encoding=3, lang=u'eng', desc=u'desc', text=lyrics))
-def get_lyrics(filename):
-    audio = MP3(filename)
+def get_lyrics(audio: MP3):
     return audio.get(u"USLT::'eng'")
 
 
-def remove_covers(filename):
-    audio = MP3(filename)
+def remove_covers(audio: MP3):
     for key in audio.keys():
-        if key.startswith('APIC'):
-            audio.pop(key)
+        if key.startswith('APIC'): audio.pop(key)
     audio.save()
 
 
-def optimize_cover(filename):
-    if has_album_art(filename):
-        audio = MP3(filename)
-        apic = audio['APIC:']
+def optimize_cover(audio: MP3):
+    apic = retrieve_album_art(audio)
+    if apic:
         data = apic.data
         data = io.BytesIO(data)
         im = Image.open(data)
@@ -424,6 +426,19 @@ def optimize_cover(filename):
             )
             audio.save()
 
+
+def fix_cover(audio: File):
+    """
+    Transfers album cover from audio key APIC:XXXX to APIC:
+    Example
+    audio['APIC: Payday 2.jpg'] = APIC() becomes audio['APIC:'] = APIC()
+     """
+    for k in audio.keys():
+        if k.startswith('APIC:') and k != 'APIC:':
+            audio['APIC:'] = audio.pop(k)
+            audio.save()
+            break
+            
 
 if __name__ == '__main__':
     pass

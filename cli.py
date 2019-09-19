@@ -72,27 +72,24 @@ def individual_select(filename):
                     if album_art_choice == 1:
                         set_simple_meta(filename)
                     elif album_art_choice == 2:
-                        set_album_cover(filename, url=input('Enter url: '))
+                        if set_album_cover(filename, url=input('Enter url: ')): print('Album cover set')
                     elif album_art_choice == 3:
-                        set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album art', filetypes=[('Image', '*.jpg *.jpeg *.png')]))
+                        if set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album art', filetypes=[('Image', '*.jpg *.jpeg *.png')])): print(f'Album cover set')
                         root.withdraw()
                     elif album_art_choice == 4:
-                        set_album_cover(filename, copy_from=filedialog.askopenfilename(initialdir=f'{music_directory}', title='Select 2nd track', filetypes=[('Audio', '*.mp3')]))
+                        if not set_album_cover(filename, copy_from=filedialog.askopenfilename(initialdir=f'{music_directory}', title='Select 2nd track', filetypes=[('Audio', '*.mp3')])):
+                            print(f'Album cover not found for: {filename}')
+                        else: print('Album cover set')
                         root.withdraw()
                     elif album_art_choice == 5:
                         search_title = input('Enter the title: ')
                         search_artist = input('Enter the artist: ')
-                        results = get_album_art(search_artist, search_title, return_all=True)
+                        results = search_album_art(search_artist, search_title, return_all=True)
                         if results:
                             image_selector.main(results, artist=search_artist, track=search_title)
                             url = os.environ.pop('SELECTED_URL', None)
-                            if url:
-                                set_album_cover(filename, url=url)
-                                print('Album cover set')
-                        else:
-                            print('No album art found :(')
-                    if album_art_choice in (1, 2, 3, 4):
-                        print('Album cover set')
+                            if url and set_album_cover(filename, url=url): print('Album cover set')
+                        else: print('No album art found :(')
                 except ValueError:
                     pass
             elif sub_menu_user_choice == 8:
@@ -115,7 +112,7 @@ def individual_select(filename):
             elif sub_menu_user_choice == 12:
                 for k, v in audio.items():
                     print(k, ':', v)
-                print('album cover :', has_album_art(filename))
+                print('album cover :', has_album_cover(audio))
             elif sub_menu_user_choice == 13:
                 start = int(input('Enter start time (seconds): '))
                 end = int(input('Enter end time (seconds): '))
@@ -171,7 +168,7 @@ def main():
         elif user_choice == 5:
             search_title = input('Enter the title: ')
             search_artist = input('Enter the artist: ')
-            results = get_album_art(search_artist, search_title, return_all=True)
+            results = search_album_art(search_artist, search_title, return_all=True)
             if results:
                 image_selector.main(results, artist=search_artist, track=search_title)
                 url = os.environ.pop('SELECTED_URL', None)

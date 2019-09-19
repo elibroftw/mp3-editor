@@ -403,7 +403,7 @@ class AlbumCoverSearcher(tk.Frame):
     def search_art(self):
         search_title = self.track_variable.get()
         search_artist = self.artist_variable.get()
-        results = get_album_art(search_artist, search_title, return_all=True)
+        results = search_album_art(search_artist, search_title, return_all=True)
         if results:
             self.controller.withdraw()
             image_selector.main(results, artist=search_artist, track=search_title)
