@@ -42,56 +42,57 @@ def individual_select(filename):
             audio.add_tags()
             easy_audio = EasyID3(filename)
         try:
-            sub_menu_user_choice = int(input('Enter an option: '))
+            sub_menu_user_choice = int(input('Enter an option (1 - 15): '))
             if sub_menu_user_choice == 1:
                 add_simple_meta(filename)
-                print('Simple metadata set')
+                print('    Simple metadata set')
             elif sub_menu_user_choice == 2:
                 add_simple_meta(filename, override=True)
-                print('Simple metadata set')
+                print('    Simple metadata set')
             elif sub_menu_user_choice == 3:
-                set_title(easy_audio, input('Enter title: '))
-                print('Title set')
+                set_title(easy_audio, input('    Enter title: '))
+                print('    Title set')
             elif sub_menu_user_choice == 4:
-                artists = input('Enter artist(s) (comma separated eg. "Elijah, Lopez"): ')
+                artists = input('    Enter artist(s) (comma separated eg. "Calvin Harris, Alesso"): ')
                 if ', ' in artists: artists = artists.split(', ')
                 set_artists(easy_audio, artists)
-                print('Artist(s) set')
+                print('    Artist(s) set')
             elif sub_menu_user_choice == 5:
-                set_album(easy_audio, input('Enter album: '))
-                print('Album title set')
+                set_album(easy_audio, input('    Enter album: '))
+                print('    Album title set')
             elif sub_menu_user_choice == 6:
-                set_album_artist(easy_audio, input('Enter album artist: '))
+                set_album_artist(easy_audio, input('    Enter album artist: '))
             elif sub_menu_user_choice == 7:
-                print('1. Auto')
-                print('2. Url')
-                print('3. Local Image')
-                print('4. Another File')
-                print('5. Manual')
-                print('6. Exit')
+                print('    1. Auto')
+                print('    2. Url')
+                print('    3. Local Image')
+                print('    4. Another File')
+                print('    5. Manual')
+                print('    6. Back')
                 try:
-                    album_art_choice = int(input('Enter an option: '))
+                    album_art_choice = int(input('    Enter an option (1 - 6): '))
                     if album_art_choice == 1:
                         set_simple_meta(filename)
                     elif album_art_choice == 2:
-                        if set_album_cover(filename, url=input('Enter url: ')): print('Album cover set')
+                        if set_album_cover(filename, url=input('    Enter url: ')): print('    Album cover set')
                     elif album_art_choice == 3:
-                        if set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album cover', filetypes=[('Image', '*.jpg *.jpeg *.png')])): print(f'Album cover set')
+                        if set_album_cover(filename, img_path=filedialog.askopenfilename(title='Select album cover', filetypes=[('Image', '*.jpg *.jpeg *.png')])):
+                            print(f'    Album cover set')
                         root.withdraw()
                     elif album_art_choice == 4:
                         if not set_album_cover(filename, copy_from=filedialog.askopenfilename(initialdir=f'{music_directory}', title='Select 2nd track', filetypes=[('Audio', '*.mp3')])):
-                            print(f'Album cover not found for: {filename}')
-                        else: print('Album cover set')
+                            print(f'    Album cover not found for: {filename}')
+                        else: print('    Album cover set')
                         root.withdraw()
                     elif album_art_choice == 5:
-                        search_title = input('Enter the title: ')
-                        search_artist = input('Enter the artist: ')
+                        search_title = input('    Enter the title: ')
+                        search_artist = input('    Enter the artist: ')
                         results = search_album_art(search_artist, search_title, return_all=True)
                         if results:
                             image_selector.main(results, artist=search_artist, track=search_title)
                             url = os.environ.pop('SELECTED_URL', None)
-                            if url and set_album_cover(filename, url=url): print('Album cover set')
-                        else: print('No album covers found :(')
+                            if url and set_album_cover(filename, url=url): print('    Album cover set')
+                        else: print('    No album covers found :(')
                 except ValueError:
                     pass
             elif sub_menu_user_choice == 8:
@@ -104,20 +105,18 @@ def individual_select(filename):
                 covers = [audio[key].data for key in audio.keys() if key.startswith('APIC')]
                 image_selector.main(image_bits=covers, artist=', '.join(easy_audio['artist']), track=easy_audio['title'][0])
             elif sub_menu_user_choice == 11:  # TODO: Rename file
-                print('Enter new file name (with extension)')
-                new_filename = path.dirname(filename) + '/' + input()
+                new_filename = path.dirname(filename) + '/' + input('    Enter new file name (with extension)')
                 if not new_filename.count('.'): new_filename += '.mp3'
                 rename(filename, new_filename)
-                print('file name changed from ', pathlib.Path(filename).name, 'to', pathlib.Path(new_filename).name)
+                print('    File name changed from ', pathlib.Path(filename).name, 'to', pathlib.Path(new_filename).name)
                 filename = new_filename
             elif sub_menu_user_choice == 12:
-                for k, v in easy_audio.items():
-                    print(k, ':', v)
-                print('album cover :', has_album_cover(audio))
-                print('bitrate:', get_bitrate(audio))
+                for k, v in easy_audio.items(): print(f'    {k}:', v)
+                print('    album cover:', has_album_cover(audio))
+                print('    bitrate:', get_bitrate(audio))
             elif sub_menu_user_choice == 13:
-                start = int(input('Enter start time (seconds): '))
-                end = int(input('Enter end time (seconds): '))
+                start = int(input('    Enter start time (seconds): '))
+                end = int(input('    Enter end time (seconds): '))
                 trim(filename, start, end)
             elif sub_menu_user_choice == 14: on_menu = False
             else: print(individual_select_menu_text)
@@ -139,7 +138,7 @@ def main():
             print('5. Search for album covers')  # make menu better
             print('6. Exit')
         try:
-            user_choice = int(input('Enter an option: '))
+            user_choice = int(input('Enter an option (1 - 6): '))
         except ValueError:
             user_choice = 0
         output_intro = True

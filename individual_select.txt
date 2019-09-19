@@ -11,5 +11,5 @@
 11. Rename file
 12. Print properties
 13. Trim audio
-14. Exit
-15. Reprint Text
+14. Exit to main menu
+15. Reprint menu
