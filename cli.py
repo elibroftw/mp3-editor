@@ -53,7 +53,7 @@ def individual_select(filename):
             elif sub_menu_user_choice == 4:
                 artists = input('Enter artist(s) (comma separated eg. "Elijah, Lopez"): ')
                 if ', ' in artists: artists = artists.split(', ')
-                set_artist(audio, artists)
+                set_artists(audio, artists)
                 print('Artist(s) set')
             elif sub_menu_user_choice == 5:
                 set_album(audio, input('Enter album: '))

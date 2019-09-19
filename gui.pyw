@@ -314,7 +314,7 @@ class IndividualTrackPage(tk.Frame):
     def set_artists(self):
         pass
         # new_artists = self.pop_up(('Enter artists',))[0].split(', ')
-        # if 'Enter artists' not in new_artists: set_artist(self.audio, new_artists)
+        # if 'Enter artists' not in new_artists: set_artists(self.audio, new_artists)
 
     def set_album(self):
         pass

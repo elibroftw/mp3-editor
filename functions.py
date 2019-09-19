@@ -90,13 +90,13 @@ def set_title(audio: EasyID3, title: str):
     audio.save()
 
 
-def set_artist(audio: EasyID3, artist):
+def set_artists(audio: EasyID3, artists):
     """
     Sets an artist for an EasyID3 object
     :param audio: EasyID3
     :param artist: string or list[str] of the artist or artists
     """
-    audio['artist'] = artist
+    audio['artist'] = artists
     audio.save()
 
 
