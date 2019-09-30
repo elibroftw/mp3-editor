@@ -358,13 +358,21 @@ def ffmpeg_helper(filename, command):
     audio['APIC:'] = album_cover
     audio.save()
     os.remove(temp_path)
-    os.remove(os.path.dirname(filename) + '/ffmpeg.log')
+    os.remove('ffmpeg.log')
 
 
-def trim(filename, start: int, end: int):
+def trim(filename, start, end):
+    if type(start) == str and start.count(':') == 1:
+        mins, secs = [int(t) for t in start.split(':')]
+        start = mins * 60 + secs
+    if type(end) == str and end.count(':') == 1:
+        mins, secs = [int(t) for t in end.split(':')]
+        end = mins * 60 + secs
+    if type(start) == str or type(end) == str: return False
     temp_path = get_temp_path(filename)
     command = f'ffmpeg -i "{temp_path}" -ss {start} -t {end} -c copy "{filename}" > ffmpeg.log 2>&1'
     ffmpeg_helper(filename, command)
+    return True
 
 
 def remove_silence(filename):

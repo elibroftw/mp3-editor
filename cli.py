@@ -115,9 +115,12 @@ def individual_select(filename):
                 print('    album cover:', has_album_cover(audio))
                 print('    bitrate:', get_bitrate(audio))
             elif sub_menu_user_choice == 13:
-                start = int(input('    Enter start time (seconds): '))
-                end = int(input('    Enter end time (seconds): '))
-                trim(filename, start, end)
+                start = int(input('    Enter start time (seconds/MM:SS): '))
+                end = int(input('    Enter end time (seconds/MM:SS): '))
+                del audio
+                del easy_audio
+                if trim(filename, start, end): print('Succesfully trimmed file')
+                else: print('Incorrect format given')
             elif sub_menu_user_choice == 14: on_menu = False
             else: print(individual_select_menu_text)
             if 0 > sub_menu_user_choice or sub_menu_user_choice > 16: print('Please enter an integer from 1 to 15')
