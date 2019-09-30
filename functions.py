@@ -158,7 +158,7 @@ def get_artist(filename):
     return artist
 
 
-def add_simple_meta(file_path, artist='', title='', album='', albumartist='', override=False):
+def add_simple_metadata(file_path, artist='', title='', album='', albumartist='', override=False):
     """
     Automatically sets the metadata for a music file
     :param file_path: the path to the music file
@@ -172,19 +172,20 @@ def add_simple_meta(file_path, artist='', title='', album='', albumartist='', ov
     audio = EasyID3(file_path)
     filename = pathlib.Path(file_path).name  # or filename = file_path[:-4]
     try:
-        if (not override and audio.get('title') and audio.get('artist')
-            and audio.get('albumartist') and has_album_cover(file_path)): return False
-        if artist == '': artist = get_artist(filename)
+        if (not override and audio.get('title', '') and audio.get('artist', '')
+            and audio.get('albumartist', '') and has_album_cover(file_path)): return False
+        if not artist: artist = get_artist(filename)
         else:
             if artist.count(' , '): artist.split(' , ')
+            elif artist.count(' ,'): artist = artist.split(' ,')
             elif artist.count(', '): artist = artist.split(', ')
             elif artist.count(','): artist = artist.split(',')
-        if title == '': title = filename[filename.index('-') + 2:-4]
+        if not title: title = filename[filename.index('-') + 2:-4]
         if override:
             audio['title'] = title
             audio['artist'] = artist
-            if album != '': audio['album'] = album
-            if albumartist != '': audio['albumartist'] = albumartist
+            if album: audio['album'] = album
+            if albumartist: audio['albumartist'] = albumartist
         else:
             if 'album' not in audio:
                 if album == '': audio['album'] = title
@@ -192,8 +193,8 @@ def add_simple_meta(file_path, artist='', title='', album='', albumartist='', ov
             if 'title' not in audio: audio['title'] = title
             if 'artist' not in audio: audio['artist'] = artist
             if 'albumartist' not in audio:
-                if albumartist == '': audio['albumartist'] = artist
-                else: audio['albumartist'] = albumartist
+                if albumartist: audio['albumartist'] = albumartist
+                else: audio['albumartist'] = artist
         audio.save()
         if not has_album_cover(file_path): set_album_cover(file_path)
         return True
@@ -202,7 +203,7 @@ def add_simple_meta(file_path, artist='', title='', album='', albumartist='', ov
         return False
 
 
-set_simple_meta = add_simple_meta
+set_simple_meta = add_simple_metadata
 
 
 def has_album_cover(audio) -> bool:
@@ -293,12 +294,12 @@ def set_album_cover(file_path, img_path='', url='', copy_from='', title='', arti
         if 'title' in easy_audio and not title:
             title = easy_audio['title'][0]
         else:
-            add_simple_meta(file_path)
+            add_simple_metadata(file_path)
             title = filename[filename.index('-') + 2:-4]
         if 'artist' in easy_audio and not artist:
             artist = easy_audio['artist'][0]
         else:
-            add_simple_meta(file_path)
+            add_simple_metadata(file_path)
             artist = get_artist(filename)
         try:
             img_path = search_album_art(artist, title, select_index=select_index)

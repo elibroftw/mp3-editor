@@ -107,7 +107,7 @@ class StartPage(tk.Frame):
 
     @staticmethod
     def set_missing_metadata():
-        for file in glob('*.mp3'): add_simple_meta(file)
+        for file in glob('*.mp3'): add_simple_metadata(file)
         # TODO: status message
 
     def select_individual_track(self):
@@ -304,7 +304,7 @@ class IndividualTrackPage(tk.Frame):
         # have all the properties beside the options
 
     def auto_set_metadata(self, override=False):
-        add_simple_meta(self.filename, override=override)
+        add_simple_metadata(self.filename, override=override)
 
     def set_title(self):
         pass

@@ -44,10 +44,10 @@ def individual_select(filename):
         try:
             sub_menu_user_choice = int(input('Enter an option (1 - 15): '))
             if sub_menu_user_choice == 1:
-                add_simple_meta(filename)
+                add_simple_metadata(filename)
                 print('    Simple metadata set')
             elif sub_menu_user_choice == 2:
-                add_simple_meta(filename, override=True)
+                add_simple_metadata(filename, override=True)
                 print('    Simple metadata set')
             elif sub_menu_user_choice == 3:
                 set_title(easy_audio, input('    Enter title: '))
@@ -72,7 +72,7 @@ def individual_select(filename):
                 try:
                     album_art_choice = int(input('    Enter an option (1 - 6): '))
                     if album_art_choice == 1:
-                        set_simple_meta(filename)
+                        add_simple_metadata(filename)
                     elif album_art_choice == 2:
                         if set_album_cover(filename, url=input('    Enter url: ')): print('    Album cover set')
                     elif album_art_choice == 3:
@@ -150,7 +150,7 @@ def main():
                 print('Directory changed to', music_directory)
         elif user_choice == 2:
             for file in tqdm(glob('*.mp3'), desc='Setting metadata'):
-                add_simple_meta(file)
+                add_simple_metadata(file)
             print('Metadata for all tracks set')
         elif user_choice == 3:
             file = filedialog.askopenfilename(initialdir=f'{music_directory}', title='Select track', filetypes=[('Audio', '*.mp3')])
