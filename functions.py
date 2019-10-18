@@ -1,14 +1,17 @@
-from pprint import pprint
-from time import time
 import base64
+from contextlib import suppress
 from glob import glob
 import io
+import json
 import os
 from os import system
+from pprint import pprint
 import subprocess
+from time import time
 from urllib import parse
 from urllib.request import urlopen
-import json
+import sys
+
 
 try:   
     import shlex
@@ -23,8 +26,8 @@ try:
     import requests
 except ImportError as e:
     print(e)
-    print('Press Enter to quit...')
-    quit()
+    print('Press Enter to exit...')
+    sys.exit()
 
 # TODO: Add ffmpeg binary to the repo
 p = subprocess.Popen('ffmpeg', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -36,7 +39,7 @@ if ar == err:
     import webbrowser
     webbrowser.open('https://ffmpeg.org/download.html')
     webbrowser.open('http://blog.gregzaal.com/how-to-install-ffmpeg-on-windows/')
-    quit()
+    sys.exit()
 
 # this dictionary store the api keys
 config = {}
@@ -76,8 +79,7 @@ try:
     # this is for future when I get a Soundcloud api key
     # SOUNDCLOUD_CLIENT_ID = config['SOUNDCLOUD_CLIENT_ID']
     # SOUNDCLOUD_CLIENT_SECRET = config['SOUNDCLOUD_CLIENT_SECRET']
-except (FileNotFoundError, KeyError):
-    print('Limited functionality')
+except (FileNotFoundError, KeyError): print('config.json not found. Limited functionality')
 
 
 def set_title(audio: EasyID3, title: str):
@@ -199,7 +201,7 @@ def add_simple_metadata(file_path, artist='', title='', album='', albumartist=''
         if not has_album_cover(file_path): set_album_cover(file_path)
         return True
     except ValueError:
-        print('Error with', filename)
+        print('Error adding metadata to', filename)
         return False
 
 
@@ -228,7 +230,7 @@ def has_album_cover(audio) -> bool:
 
 
 def retrieve_album_art(audio: MP3):
-    apics = [k for k in audio if k.startswith('APIC')]
+    apics = [v for k, v in audio.items() if k.startswith('APIC')]
     if apics: return apics[0]
     return None
 
@@ -258,10 +260,8 @@ def search_album_art(artist, title, select_index=0, return_all=False):
 def set_album_cover(file_path, img_path='', url='', copy_from='', title='', artist='', select_index=0):
     audio = MP3(file_path, ID3=mutagen.id3.ID3)
     filename = pathlib.Path(file_path).name
-    try:
+    with suppress(mutagen.id3.error):
         audio.add_tags()
-    except mutagen.id3.error:
-        pass
     if title and artist:
         try:
             img_path = search_album_art(artist, title)
@@ -424,7 +424,8 @@ def optimize_cover(audio: MP3):
         data = io.BytesIO(data)
         im = Image.open(data)
         new_data = io.BytesIO()
-        im.save(new_data, optimize=True, format='JPEG')
+        try: im.save(new_data, optimize=True, format='JPEG')
+        except OSError: im.convert('RGB').save(new_data, optimize=True, format='JPEG')
         if len(data.getvalue()) - len(new_data.getvalue()) > 0:
             audio['APIC:'] = mutagen.id3.APIC(
                 encoding=0,  # 3 is for utf-8
@@ -441,12 +442,15 @@ def fix_cover(audio: File):
     Transfers album cover from audio key APIC:XXXX to APIC:
     Example
     audio['APIC: Payday 2.jpg'] = APIC() becomes audio['APIC:'] = APIC()
-     """
+    """
+    restart = False
     for k in audio.keys():
         if k.startswith('APIC:') and k != 'APIC:':
             audio['APIC:'] = audio.pop(k)
             audio.save()
+            restart = True
             break
+    if restart: fix_cover(audio)
 
 
 def get_bitrate(audio: File):

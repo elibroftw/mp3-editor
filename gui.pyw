@@ -5,8 +5,8 @@ from tkinter import messagebox
 from os import chdir
 from functions import *
 import image_selector
-from image_selector import center
-from contextlib import suppress
+center = image_selector.center
+
 
 LARGE_FONT = ('Verdana', 12)
 music_directory = config.get('MUSIC_LOCATION', '')
@@ -72,7 +72,7 @@ class StartPage(tk.Frame):
         button1 = Button(self, text=f'Change Directory', bg=bbg, activebackground=babg, command=self.change_directory)
         button1.pack(pady=10)
 
-        button2 = Button(self, text='Auto-set metadata for files with missing metadata and album art', bg=bbg,
+        button2 = Button(self, text='Auto-set metadata for files with missing metadata and album cover', bg=bbg,
                          activebackground=babg, command=self.set_missing_metadata)
         button2.pack(pady=10)
 
@@ -240,7 +240,7 @@ class IndividualTrackPage(tk.Frame):
         # info.pack(side=tk.LEFT)
         # buttons.pack(side=tk.RIGHT)
 
-        button2 = tk.Button(self, text='Auto set metadata and album art', bg=bbg, activebackground=babg,
+        button2 = tk.Button(self, text='Auto set metadata and album cover', bg=bbg, activebackground=babg,
                             command=self.auto_set_metadata)
         button2.pack(pady=10, padx=10)
         # button2.pack(in_=buttons, pady=10, padx=10)
@@ -377,7 +377,7 @@ class AlbumCoverSearcher(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         button1.pack(in_=top_stuff, side=tk.LEFT)
 
-        label1 = Label(self, text='Search For Album Art', bg='#141414', fg='white', font=LARGE_FONT)
+        label1 = Label(self, text='Search For Album Cover', bg='#141414', fg='white', font=LARGE_FONT)
         label1.pack(in_=top_stuff, side=tk.RIGHT, padx=90)
 
         search_stuff = tk.Frame(self, bg='#141414')
@@ -415,7 +415,7 @@ class AlbumCoverSearcher(tk.Frame):
                 else:
                     self.label2.configure(text=url)
         else:
-            self.label2.configure(text='No album art found :(')
+            self.label2.configure(text='No album cover found :(')
 
 
 if __name__ == '__main__':

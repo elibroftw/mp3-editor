@@ -5,11 +5,12 @@
 5. Set album
 6. Set album artist
 7. Set album cover (auto, url, local image, from another file, manual search)
-8. Set genre (not yet implemented)
-9. Set year (not yet implemented)
-10. View album covers
-11. Rename file
-12. Print properties
-13. Trim audio
-14. Exit to main menu
-15. Reprint menu
+8. Optimize album cover
+9. View album covers
+10. Set genre (not yet implemented)
+11. Set year (not yet implemented)
+12. Rename file
+13. Print properties
+14. Trim audio
+15. Exit to main menu
+16. Reprint menu

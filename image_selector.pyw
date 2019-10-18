@@ -1,11 +1,12 @@
+from contextlib import suppress
 import io
 import os
 import tkinter as tk
-from contextlib import suppress
 from tkinter.font import Font
-import urllib.request
-import webbrowser
 from tkinter import filedialog
+import webbrowser
+import urllib.request
+
 from win10toast import ToastNotifier
 from PIL import Image, ImageTk
 from functions import copy
@@ -23,16 +24,15 @@ def center(top_level):
 
 
 current_image_index = 0
-toaster = ToastNotifier()  # maybe do two?
+toaster = ToastNotifier()
 
 # def display_images(image_bits):
 #     images = [Image.open(io.BytesIO(image)) for image in image_bits]
 
 
-def main(image_urls=[], artist='', track='', image_bits=[]):
+def image_selector(image_urls=[], artist='', track='', image_bits=[]):
     global current_image_index
-    if __name__ == '__main__':
-        root = tk.Tk()
+    if __name__ == '__main__':  root = tk.Tk()
     else:
         root = tk.Toplevel()
         root.geometry('800x480')
@@ -186,6 +186,6 @@ if __name__ == '__main__':
         'https://i.scdn.co/image/e22b78f31c106bbec4b61709bd6fa2e393e2eaaf',
         'https://i.scdn.co/image/e22b78f31c106bbec4b61709bd6fa2e393e2eaaf',
     ]
-    main(sample_urls, artist='88GLAM', track='Lil Boat (Remix)')
+    image_selector(sample_urls, artist='88GLAM', track='Lil Boat (Remix)')
     selected_url = os.environ.pop('SELECTED_URL', None)
     if selected_url: print(selected_url)

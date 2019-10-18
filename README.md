@@ -3,9 +3,9 @@ My own Music File editor made in python that can automatically set metadata and 
 
 # Features
 - Metadata setter (auto, manual)
-- Album art setter (auto [needs spotify API key], manual)
+- Album cover setter (auto [needs spotify API key], manual)
 - Trimming options
-- View album art
+- View album covers
 
 # How to use
 - pip install -r requirements.txt
@@ -16,7 +16,9 @@ My own Music File editor made in python that can automatically set metadata and 
 - For the album cover feature, you need to have your own Spotify API.
 
 # Note
-This has been untested on Linux and Mac.
+This has not been tested on Linux and Mac.
+This program assumes that a audio file onyl requires at most one album cover.
+Optimize covers converts PNG images to JPEG.
 
 # config.json format
 
