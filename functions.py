@@ -344,7 +344,7 @@ def ffmpeg_helper(filename, command):
     title = audio['title']
     album = audio['album']
     album_artist = audio['albumartist']
-    album_cover = MP3(filename, ID3=mutagen.id3.ID3)['APIC:']
+    album_cover = MP3(filename, ID3=mutagen.id3.ID3).get('APIC:')
     temp_path = get_temp_path(filename)
     os.rename(filename, temp_path)
     os.system(command)
@@ -355,19 +355,21 @@ def ffmpeg_helper(filename, command):
     audio['albumartist'] = album_artist
     audio.save()
     audio = MP3(filename, ID3=mutagen.id3.ID3)
-    audio['APIC:'] = album_cover
+    if album_cover is not None: audio['APIC:'] = album_cover
     audio.save()
     os.remove(temp_path)
     os.remove('ffmpeg.log')
 
 
 def trim(filename, start, end):
+    song_length = File(filename).info.length
+    set_simple_meta(filename,)
     if type(start) == str and start.count(':') == 1:
         mins, secs = [int(t) for t in start.split(':')]
-        start = mins * 60 + secs
+        start = min(max(mins * 60 + secs, 0), song_length)
     if type(end) == str and end.count(':') == 1:
         mins, secs = [int(t) for t in end.split(':')]
-        end = mins * 60 + secs
+        end = max(mins * 60 + secs, song_length)
     if type(start) == str or type(end) == str: return False
     temp_path = get_temp_path(filename)
     command = f'ffmpeg -i "{temp_path}" -ss {start} -t {end} -c copy "{filename}" > ffmpeg.log 2>&1'
