@@ -108,6 +108,12 @@ def individual_select(filename):
                 filename = new_filename
             elif sub_menu_user_choice == 13:
                 for k, v in easy_audio.items(): print(f'    {k}:', v)
+                song_length = get_song_length(filename)
+                minutes = int(song_length / 60)
+                seconds = round(song_length % 60)
+                if seconds < 10: seconds = f'0{seconds}'
+                song_length = f'{minutes}:{seconds}'
+                print('    song length:', song_length)
                 print('    album cover:', has_album_cover(audio))
                 print('    bitrate:', get_bitrate(audio))
             elif sub_menu_user_choice == 14:

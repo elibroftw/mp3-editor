@@ -361,8 +361,12 @@ def ffmpeg_helper(filename, command):
     os.remove('ffmpeg.log')
 
 
+def get_song_length(filename):
+    return File(filename).info.length
+
+
 def trim(filename, start, end):
-    song_length = File(filename).info.length
+    song_length = get_song_length(filename)
     set_simple_meta(filename,)
     if type(start) == str and start.count(':') == 1:
         mins, secs = [int(t) for t in start.split(':')]
