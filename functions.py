@@ -367,13 +367,14 @@ def get_song_length(filename):
 
 def trim(filename, start, end):
     song_length = get_song_length(filename)
-    set_simple_meta(filename,)
+    set_simple_meta(filename)
     if type(start) == str and start.count(':') == 1:
         mins, secs = [int(t) for t in start.split(':')]
         start = min(max(mins * 60 + secs, 0), song_length)
     if type(end) == str and end.count(':') == 1:
         mins, secs = [int(t) for t in end.split(':')]
         end = max(mins * 60 + secs, song_length)
+    if end == '': end = song_length
     if type(start) == str or type(end) == str: return False
     temp_path = get_temp_path(filename)
     command = f'ffmpeg -i "{temp_path}" -ss {start} -t {end} -c copy "{filename}" > ffmpeg.log 2>&1'
