@@ -56,7 +56,7 @@ def individual_select(filename):
                 print('    Artist(s) set')
             elif sub_menu_user_choice == 5:
                 set_album(easy_audio, input('    Enter album: '))
-                print('    Album title set')
+                print('    Album set')
             elif sub_menu_user_choice == 6:
                 set_album_artist(easy_audio, input('    Enter album artist: '))
             elif sub_menu_user_choice == 7:
