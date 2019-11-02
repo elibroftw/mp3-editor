@@ -331,7 +331,7 @@ add_mp3_cover = add_album_cover = set_album_cover
 # @memoize
 def get_temp_path(filename):
     base = os.path.basename(filename)
-    base = f'TEMP {base}'
+    base = f'BACKUP {base}'
     directory = os.path.dirname(filename)
     temp_path = directory + '/' + base
     # os.rename(filename, temp_path)
@@ -375,6 +375,8 @@ def trim(filename, start, end):
         mins, secs = [int(t) for t in end.split(':')]
         end = max(mins * 60 + secs, song_length)
     if end == '': end = song_length
+    with suppress(ValueError): start = float(start)
+    with suppress(ValueError): end = float(end)
     if type(start) == str or type(end) == str: return False
     temp_path = get_temp_path(filename)
     command = f'ffmpeg -i "{temp_path}" -ss {start} -t {end} -c copy "{filename}" > ffmpeg.log 2>&1'
