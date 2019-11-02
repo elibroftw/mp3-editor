@@ -117,8 +117,8 @@ def individual_select(filename):
                 print('    album cover:', has_album_cover(audio))
                 print('    bitrate:', get_bitrate(audio))
             elif sub_menu_user_choice == 14:
-                start = int(input('    Enter start time (seconds / MM:SS): '))
-                end = int(input('    Enter end time (seconds / MM:SS): '))
+                start = input('    Enter start time (seconds / MM:SS): ')
+                end = input('    Enter end time (seconds / MM:SS): ')
                 del audio
                 del easy_audio
                 if trim(filename, start, end): print('Succesfully trimmed file')
