@@ -18,7 +18,7 @@ try:
     import shlex
     import platform
     import pathlib
-    from mutagen import File
+    from mutagen import File, MutagenError
     from mutagen.easyid3 import EasyID3
     import mutagen.id3
     from mutagen.id3 import Encoding
@@ -31,6 +31,7 @@ except ImportError as e:
     sys.exit()
 
 # TODO: Add ffmpeg binary to the repo
+# TODO: Support multiple folders
 starting_dir = os.getcwd()
 COUNTRY_CODES = ['MX', 'CA', 'US', 'UK', 'HK']
 p = subprocess.Popen('ffmpeg', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -221,10 +222,11 @@ def add_simple_metadata(file_path, artist='', title='', album='', albumartist=''
     :return: True or False depending on whether audio file was changed or not
     """
     audio = EasyID3(file_path)
-    filename = pathlib.Path(file_path).name  # or filename = file_path[:-4]
+    filename = pathlib.Path(file_path).name
+    advanced_audio = File(file_path)
     try:
         if (not override and audio.get('title', '') and audio.get('artist', '')
-            and audio.get('albumartist', '') and has_album_cover(file_path)): return False
+            and audio.get('albumartist', '') and has_album_cover(file_path)) and 'TDRC' in advanced_audio: return False
         if not artist: artist = get_artist(filename)
         else:
             if artist.count(' , '): artist.split(' , ')
@@ -252,6 +254,8 @@ def add_simple_metadata(file_path, artist='', title='', album='', albumartist=''
             auto_set_year(audio, artist, title)
         if not has_album_cover(file_path): set_album_cover(file_path)
         return True
+    except MutagenError:
+        print(f'{filename} in use')
     except ValueError:
         print('Error adding metadata to', filename)
         return False
@@ -521,12 +525,15 @@ def find_bitrates_under(files, bitrate_thresh):
             low_quality_files.append(file)
     with open(f'{starting_dir}/files under bitrate_thresh.txt', 'w') as f:
         f.write('\n'.join(low_quality_files))
+    return low_quality_files
             
+
 if __name__ == '__main__':
     # search_album_art('Afrojack', 'No Beef', return_all=True)
+    find_bitrates_under(glob(r'C:\Users\maste\OneDrive\Music\*.mp3'), 192000)
     a = MP3(r"C:\Users\maste\OneDrive\Music\Afrojack, Steve Aoki, Miss Palmer - No Beef.mp3")
     a2 = MP3(r"C:\Users\maste\OneDrive\Music\Adam K & Soha - Twilight.mp3")
-    auto_set_year(a, 'Afrojack', 'No Beef')
-    auto_set_year(a2, 'Adam K', 'Twilight')
+    # auto_set_year(a, 'Afrojack', 'No Beef')
+    # auto_set_year(a2, 'Adam K', 'Twilight')
     assert get_year(a2) == '2007'
     assert get_year(a)  == '2011'
