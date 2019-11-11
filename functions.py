@@ -250,11 +250,14 @@ def search_album_art(artist, title, select_index=0, return_all=False):
     """
     # TODO: add soundcloud search as well if spotify comes up with no results.
     #  Soundcloud has it disabled
-    artist, title = parse.quote_plus(artist), parse.quote_plus(title)
+    artist, title = parse.quote(artist), parse.quote(title)
     header = {'Authorization': 'Bearer ' + get_spotify_access_token()}
-    r = requests.get(f'https://api.spotify.com/v1/search?q={title}+artist:{artist}&type=track,album', headers=header)
-    links_from_albums = [item['images'][0]['url'] for item in r.json()['albums']['items']]
-    links_from_tracks = [item['album']['images'][0]['url'] for item in r.json()['tracks']['items']]
+    # TODO: loop through all markets
+    url = f'https://api.spotify.com/v1/search?q={title}+artist:{artist}&type=track,album'
+    r = requests.get(url, headers=header).json()
+    pprint(r)
+    links_from_albums = [item['images'][0]['url'] for item in r['albums']['items']]
+    links_from_tracks = [item['album']['images'][0]['url'] for item in r['tracks']['items']]
     if return_all:
         for link in links_from_albums:
             if link not in links_from_tracks: links_from_tracks.append(link)
@@ -483,4 +486,4 @@ def find_bitrates_under(files, bitrate_thresh):
         f.write('\n'.join(low_quality_files))
             
 if __name__ == '__main__':
-    pass
+    search_album_art('Afrojack', 'No Beef', return_all=True)
