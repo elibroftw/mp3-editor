@@ -30,6 +30,7 @@ except ImportError as e:
     sys.exit()
 
 # TODO: Add ffmpeg binary to the repo
+starting_dir = os.getcwd()
 p = subprocess.Popen('ffmpeg', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 out, err = p.communicate()
 ar = b"'ffmpeg' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n"
@@ -239,7 +240,6 @@ get_album_art = retrieve_album_art
 
 
 def search_album_art(artist, title, select_index=0, return_all=False):
-    # TODO: rename to search_album_art
     """
     Fetches max resolution album cover(s) for track (artist and title specified) using Spotify API
     :param artist: artist
@@ -252,10 +252,15 @@ def search_album_art(artist, title, select_index=0, return_all=False):
     #  Soundcloud has it disabled
     artist, title = parse.quote_plus(artist), parse.quote_plus(title)
     header = {'Authorization': 'Bearer ' + get_spotify_access_token()}
-    r = requests.get(f'https://api.spotify.com/v1/search?q={title}+artist:{artist}&type=track', headers=header)
-    if return_all: return [item['album']['images'][0]['url'] for item in r.json()['tracks']['items']]
-    return r.json()['tracks']['items'][select_index]['album']['images'][0]['url']
+    r = requests.get(f'https://api.spotify.com/v1/search?q={title}+artist:{artist}&type=track,album', headers=header)
+    links_from_albums = [item['images'][0]['url'] for item in r.json()['albums']['items']]
+    links_from_tracks = [item['album']['images'][0]['url'] for item in r.json()['tracks']['items']]
+    if return_all: return list(set(links_from_tracks + links_from_albums))
+    if links_from_tracks: return
+    return links_from_tracks[0]
 
+
+find_album_covers = search_album_covers = search_album_art
 
 def set_album_cover(file_path, img_path='', url='', copy_from='', title='', artist='', select_index=0):
     audio = MP3(file_path, ID3=mutagen.id3.ID3)
@@ -464,7 +469,16 @@ def fix_cover(audio: File):
 
 def get_bitrate(audio: File):
     return audio.info.bitrate
-            
 
+
+def find_bitrates_under(files, bitrate_thresh):
+    low_quality_files = []
+    for file in files:
+        a = File(file)
+        if get_bitrate(a) < bitrate_thresh:
+            low_quality_files.append(file)
+    with open(f'{starting_dir}/files under bitrate_thresh.txt', 'w') as f:
+        f.write('\n'.join(low_quality_files))
+            
 if __name__ == '__main__':
     pass

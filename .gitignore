@@ -5,3 +5,4 @@ ffmpeg.log
 .env
 config.json
 test.py
+files under bitrate_thresh.txt
