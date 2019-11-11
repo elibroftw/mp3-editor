@@ -255,8 +255,10 @@ def search_album_art(artist, title, select_index=0, return_all=False):
     r = requests.get(f'https://api.spotify.com/v1/search?q={title}+artist:{artist}&type=track,album', headers=header)
     links_from_albums = [item['images'][0]['url'] for item in r.json()['albums']['items']]
     links_from_tracks = [item['album']['images'][0]['url'] for item in r.json()['tracks']['items']]
-    if return_all: return list(set(links_from_tracks + links_from_albums))
-    if links_from_tracks: return
+    if return_all:
+        for link in links_from_albums:
+            if link not in links_from_tracks: links_from_tracks.append(link)
+        return links_from_tracks
     return links_from_tracks[0]
 
 
