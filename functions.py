@@ -11,6 +11,7 @@ from time import time
 from urllib import parse
 from urllib.request import urlopen
 import sys
+import re
 
 
 try:   
@@ -31,6 +32,7 @@ except ImportError as e:
 
 # TODO: Add ffmpeg binary to the repo
 starting_dir = os.getcwd()
+COUNTRY_CODES = ['MX', 'CA', 'US', 'UK', 'HK']
 p = subprocess.Popen('ffmpeg', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 out, err = p.communicate()
 ar = b"'ffmpeg' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n"
@@ -123,6 +125,51 @@ def set_album_artist(audio: EasyID3, album_artist):
     audio.save()
 
 
+def auto_set_year(audio: MP3, artist, title):
+    url1 = f'https://api.spotify.com/v1/search?q={title}+artist:{artist}&type=track&market=US'
+    url2 = f'https://api.spotify.com/v1/search?q={title}+artist:{artist}&type=track&market=CA'
+    urls = [url1, url2]
+    artist, title = parse.quote(artist), parse.quote(title)
+    header = {'Authorization': 'Bearer ' + get_spotify_access_token()}
+    for url in urls:
+        r = requests.get(url, headers=header).json()
+        if 'tracks' in r:
+            p = re.compile('[1-9][0-9]{3}')
+            min_year = None
+            for item in r['tracks']['items']:
+                release_year = int(p.search(item['album']['release_date']).group())
+                if min_year is None: min_year = release_year
+                else: min_year = min(min_year, release_year)
+            if min_year is not None:
+                set_year(audio, str(min_year))
+                return True
+    return False
+
+def set_year(audio: MP3, year: int):
+    audio['TDRC'] = mutagen.id3.TDRC(encoding=3, text=year)
+    audio.save()
+
+
+def set_genre(filename, genres=None):
+    # requires last fm api
+    if genres is None:
+        easy_audio = EasyID3(filename)
+        artist, title = easy_audio['artist'][0], easy_audio['title'][0]
+        error_string = f'Genre not set for {artist} - {title}'
+        artist, title = parse.quote_plus(artist), parse.quote_plus(title)
+        url = f'https://ws.audioscrobbler.com/2.0/?method=track.getInfo&track={title}&artist={artist}&api_key={LASTFM_API}&format=json'
+        r = requests.get(url)
+        try: sample = r.json()['track']['toptags']['tag']
+        except KeyError:
+            print(error_string)
+            return False
+        genres = [tag['name'] for tag in sample][:3]
+    audio = MP3(filename)
+    audio['TCON'] = mutagen.id3.TCON(encoding=3, text=';'.join(genres))  # genre key is TCON
+    audio.save()
+    return True
+
+
 def get_artist(filename):
     """
     Extraction of artist name(s) from filename
@@ -197,8 +244,11 @@ def add_simple_metadata(file_path, artist='', title='', album='', albumartist=''
             if 'artist' not in audio: audio['artist'] = artist
             if 'albumartist' not in audio:
                 if albumartist: audio['albumartist'] = albumartist
-                else: audio['albumartist'] = artist
+                else: audio['albumartist'] = artist        
         audio.save()
+        audio = MP3(file_path)
+        if artist and title and override or audio.get('TDRC', False):
+            auto_set_year(audio, artist, title)
         if not has_album_cover(file_path): set_album_cover(file_path)
         return True
     except ValueError:
@@ -206,7 +256,7 @@ def add_simple_metadata(file_path, artist='', title='', album='', albumartist=''
         return False
 
 
-set_simple_meta = add_simple_metadata
+auto_set_metadata = auto_set_simple_metadata = set_simple_meta = add_simple_metadata
 
 
 def has_album_cover(audio) -> bool:
@@ -253,16 +303,19 @@ def search_album_art(artist, title, select_index=0, return_all=False):
     artist, title = parse.quote(artist), parse.quote(title)
     header = {'Authorization': 'Bearer ' + get_spotify_access_token()}
     # TODO: loop through all markets
-    url = f'https://api.spotify.com/v1/search?q={title}+artist:{artist}&type=track,album'
-    r = requests.get(url, headers=header).json()
-    pprint(r)
-    links_from_albums = [item['images'][0]['url'] for item in r['albums']['items']]
-    links_from_tracks = [item['album']['images'][0]['url'] for item in r['tracks']['items']]
-    if return_all:
-        for link in links_from_albums:
-            if link not in links_from_tracks: links_from_tracks.append(link)
-        return links_from_tracks
-    return links_from_tracks[0]
+    links = []
+    links_set = set()
+    for code in COUNTRY_CODES:
+        url = f'https://api.spotify.com/v1/search?q={title}+artist:{artist}&type=track&market={code}'
+        r = requests.get(url, headers=header).json()
+        if 'tracks' in r:
+            links_from_country = [item['album']['images'][0]['url'] for item in r['tracks']['items']]
+            for link in links_from_country:
+                if link not in links_set:
+                    links.append(link)
+                    links_set.add(link)
+    if return_all: return links
+    return links[0]
 
 
 find_album_covers = search_album_covers = search_album_art
@@ -401,29 +454,12 @@ def remove_silence(filename):
     ffmpeg_helper(filename, command)
 
 
-def set_genre(filename, genres=None):
-    # requires last fm api
-    if genres is None:
-        easy_audio = EasyID3(filename)
-        artist, title = easy_audio['artist'][0], easy_audio['title'][0]
-        error_string = f'Genre not set for {artist} - {title}'
-        artist, title = parse.quote_plus(artist), parse.quote_plus(title)
-        url = f'https://ws.audioscrobbler.com/2.0/?method=track.getInfo&track={title}&artist={artist}&api_key={LASTFM_API}&format=json'
-        r = requests.get(url)
-        try: sample = r.json()['track']['toptags']['tag']
-        except KeyError:
-            print(error_string)
-            return False
-        genres = [tag['name'] for tag in sample][:3]
-    audio = MP3(filename)
-    audio['TCON'] = mutagen.id3.TCON(encoding=3, text=u';'.join(genres))  # genre key is TCON
-    audio.save()
-    return True
-
-
 def get_genre(audio: MP3):
     return audio.get('TCON')
 
+
+def get_year(audio: MP3):
+    return audio.get('TDRC')
 
 # audio[u"USLT::'eng'"] = (USLT(encoding=3, lang=u'eng', desc=u'desc', text=lyrics))
 def get_lyrics(audio: MP3):
@@ -486,4 +522,10 @@ def find_bitrates_under(files, bitrate_thresh):
         f.write('\n'.join(low_quality_files))
             
 if __name__ == '__main__':
-    search_album_art('Afrojack', 'No Beef', return_all=True)
+    # search_album_art('Afrojack', 'No Beef', return_all=True)
+    a = MP3(r"C:\Users\maste\OneDrive\Music\Afrojack, Steve Aoki, Miss Palmer - No Beef.mp3")
+    a2 = MP3(r"C:\Users\maste\OneDrive\Music\Adam K & Soha - Twilight.mp3")
+    auto_set_year(a, 'Afrojack', 'No Beef')
+    auto_set_year(a2, 'Adam K', 'Twilight')
+    assert get_year(a2) == '2007'
+    assert get_year(a)  == '2011'
