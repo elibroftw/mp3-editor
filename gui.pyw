@@ -267,11 +267,11 @@ class IndividualTrackPage(tk.Frame):
         button8 = tk.Button(self, text='Set album cover', bg=bbg, activebackground=babg, command=self.set_album_cover)
         button8.pack(pady=10, padx=10)
 
-        # button9 = tk.Button(self, text='Set genre', bg=bbg, activebackground=babg, command=self.set_genre)
-        # button9.pack(pady=10, padx=10)
+        button9 = tk.Button(self, text='Set genre', bg=bbg, activebackground=babg, command=self.set_genre)
+        button9.pack(pady=10, padx=10)
 
-        # button10 = tk.Button(self, text='Set year', bg=bbg, activebackground=babg, command=self.set_year)
-        # button10.pack(pady=10, padx=10)
+        button10 = tk.Button(self, text='Set year', bg=bbg, activebackground=babg, command=self.set_year)
+        button10.pack(pady=10, padx=10)
 
         button11 = tk.Button(self, text='Rename File', bg=bbg, activebackground=babg, command=self.rename_file)
         button11.pack(pady=10, padx=10)
@@ -328,10 +328,10 @@ class IndividualTrackPage(tk.Frame):
         pass
 
     def set_genre(self):
-        raise NotImplementedError
+        pass
 
     def set_year(self):
-        raise NotImplementedError
+        pass
 
     def rename_file(self):
         pass
