@@ -7,8 +7,8 @@
 7. Set album cover (auto, url, local image, from another file, manual search)
 8. Optimize album cover
 9. View album covers
-10. Set genre (not yet implemented)
-11. Set year (not yet implemented)
+10. Set genre (BETA)
+11. Set year  (BETA)
 12. Rename file
 13. Print properties
 14. Trim audio

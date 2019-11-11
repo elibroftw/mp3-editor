@@ -95,11 +95,10 @@ def individual_select(filename):
                 # root.lift()
                 image_selector(image_bits=covers, artist=', '.join(easy_audio['artist']), track=easy_audio['title'][0])
             elif sub_menu_user_choice == 10:
-                # set_genre(audio, input('Enter genre: '))
-                pass
+                print('A genre is a semi-colon seperated list')
+                set_genre(audio, input('Enter genre(s): '))
             elif sub_menu_user_choice == 11:
-                # set_year(audio, input('Enter year (YYYY):)
-                pass
+                set_year(audio, input('Enter year (YYYY):'))
             elif sub_menu_user_choice == 12:  # TODO: Rename file
                 new_filename = path.dirname(filename) + '/' + input('    Enter new file name (with extension)')
                 if not new_filename.count('.'): new_filename += '.mp3'

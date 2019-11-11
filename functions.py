@@ -164,7 +164,8 @@ def set_genre(filename, genres=None):
             print(error_string)
             return False
         genres = [tag['name'] for tag in sample][:3]
-    audio = MP3(filename)
+    if type(filename) not in (MP3, File): audio = MP3(filename)
+    else: audio = filename
     audio['TCON'] = mutagen.id3.TCON(encoding=3, text=';'.join(genres))  # genre key is TCON
     audio.save()
     return True
