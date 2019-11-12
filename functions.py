@@ -45,10 +45,10 @@ if ar == err:
     webbrowser.open('http://blog.gregzaal.com/how-to-install-ffmpeg-on-windows/')
     sys.exit()
 
-# this dictionary store the api keys
-config = {}
-spotify_access_token_creation = 0
-spotify_access_token = ''
+
+config = {}  # stores the API keys
+# spotify_access_token_creation = 0
+# spotify_access_token = ''
 
 
 def copy(text):
@@ -59,14 +59,28 @@ def copy(text):
     return False
 
 
+def spotify_access_token_deco(f):
+    spotify_access_token = ''
+    spotify_access_token_creation = 0
+
+    def helper():
+        nonlocal spotify_access_token, spotify_access_token_creation
+        if time() - spotify_access_token_creation > 21600:
+            spotify_access_token = f()
+            spotify_access_token_creation = time()
+        return spotify_access_token
+    
+    return helper
+
+
+
+@spotify_access_token_deco
 def get_spotify_access_token():
-    global spotify_access_token, spotify_access_token_creation
-    if time() - spotify_access_token_creation > 21600:
-        spotify_access_token_creation = time()
-        header = {'Authorization': 'Basic ' + SPOTIFY_B64_AUTH_STR}
-        data = {'grant_type': 'client_credentials'}
-        access_token_response = requests.post('https://accounts.spotify.com/api/token', headers=header, data=data)
-        spotify_access_token = access_token_response.json()['access_token']
+    spotify_access_token_creation = time()
+    header = {'Authorization': 'Basic ' + SPOTIFY_B64_AUTH_STR}
+    data = {'grant_type': 'client_credentials'}
+    access_token_response = requests.post('https://accounts.spotify.com/api/token', headers=header, data=data)
+    spotify_access_token = access_token_response.json()['access_token']
     return spotify_access_token
 
 
@@ -399,13 +413,11 @@ def set_album_cover(file_path, img_path='', url='', copy_from='', title='', arti
 add_mp3_cover = add_album_cover = set_album_cover
 
 
-# @memoize
 def get_temp_path(filename):
     base = os.path.basename(filename)
     base = f'BACKUP {base}'
     directory = os.path.dirname(filename)
     temp_path = directory + '/' + base
-    # os.rename(filename, temp_path)
     return temp_path
 
 
@@ -469,9 +481,9 @@ def get_genre(audio: MP3):
 def get_year(audio: MP3):
     return audio.get('TDRC')
 
-# audio[u"USLT::'eng'"] = (USLT(encoding=3, lang=u'eng', desc=u'desc', text=lyrics))
+
 def get_lyrics(audio: MP3):
-    return audio.get(u"USLT::'eng'")
+    return audio.get("USLT::'eng'")
 
 
 def remove_covers(audio: MP3):
@@ -490,13 +502,7 @@ def optimize_cover(audio: MP3):
         try: im.save(new_data, optimize=True, format='JPEG')
         except OSError: im.convert('RGB').save(new_data, optimize=True, format='JPEG')
         if len(data.getvalue()) - len(new_data.getvalue()) > 0:
-            audio['APIC:'] = mutagen.id3.APIC(
-                encoding=0,  # 3 is for utf-8
-                mime='image/jpeg',  # image/jpeg or image/png
-                type=3,  # 3 is for the cover image
-                # desc=u'Cover',
-                data=new_data.getvalue()
-            )
+            audio['APIC:'] = mutagen.id3.APIC(encoding=0, mime='image/jpeg', type=3, data=new_data.getvalue())
             audio.save()
 
 
