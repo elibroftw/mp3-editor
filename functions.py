@@ -376,18 +376,20 @@ def set_album_cover(file_path, img_path='', url='', copy_from='', title='', arti
         except (KeyError, ValueError, IndexError):
             return False
 
-    if img_path.endswith('png'): mime = 'image/png'
-    else: mime = 'image/jpeg'
+    if img_path.endswith('png'):
+        mime = 'image/png'
+        image_format = 'PNG'
+    else:
+        mime = 'image/jpeg'
+        image_format = 'JPEG'
     data = io.BytesIO(image_data)
     im = Image.open(data)
     image_data = io.BytesIO()
-    im.save(image_data, optimize=True, format='JPEG')
-    # image.desc = 'front cover'
+    im.save(image_data, optimize=True, format=image_format)
     audio['APIC:'] = mutagen.id3.APIC(
-        encoding=0,  # 3 is for utf-8
-        mime=mime,  # image/jpeg or image/png
-        type=3,  # 3 is for the cover image
-        # desc=u'Album Cover',
+        encoding=0,
+        mime=mime,
+        type=3,
         data=image_data.getvalue()
     )
     audio.save()
