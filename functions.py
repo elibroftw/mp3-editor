@@ -307,7 +307,7 @@ def search_album_art(artist, title, select_index=0, return_all=False):
     #  Soundcloud has it disabled
     artist, title = parse.quote(artist), parse.quote(title)
     header = {'Authorization': 'Bearer ' + get_spotify_access_token()}
-    # TODO: loop through all markets
+    # TODO: search through playlists too
     links = []
     links_set = set()
     for code in COUNTRY_CODES:
@@ -348,6 +348,7 @@ def set_album_cover(file_path, img_path='', url='', copy_from='', title='', arti
         try:
             audio['APIC:'] = other_audio['APIC:']
             audio.save()
+            return True
         except KeyError:
             other_audio = other_audio.items()
             unchanged = True

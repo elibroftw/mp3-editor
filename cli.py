@@ -73,10 +73,14 @@ def individual_select(filename):
                     elif album_art_choice == 2:
                         if set_album_cover(filename, url=input('    Enter url: ')): print('    Album cover set')
                     elif album_art_choice == 3:
+                        root.deiconify()
+                        root.focus_force()
                         if set_album_cover(filename, img_path=tk.filedialog.askopenfilename(title='Select album cover', filetypes=[('Image', '*.jpg *.jpeg *.png')])):
                             print(f'    Album cover set')
                         root.withdraw()
                     elif album_art_choice == 4:
+                        root.deiconify()
+                        root.focus_force()
                         if not set_album_cover(filename, copy_from=tk.filedialog.askopenfilename(initialdir=f'{music_directory}', title='Select 2nd track', filetypes=[('Audio', '*.mp3')])):
                             print(f'    Album cover not found for: {filename}')
                         else: print('    Album cover set')
@@ -155,6 +159,8 @@ def main():
             for file in tqdm(glob('*.mp3'), desc='Setting metadata'): add_simple_metadata(file)
             print('Metadata set for all tracks')
         elif user_choice == 3:
+            root.deiconify()
+            root.focus_force()
             file = tk.filedialog.askopenfilename(initialdir=f'{music_directory}', title='Select track', filetypes=[('Audio', '*.mp3')])
             root.withdraw()
             if file: individual_select(file)
