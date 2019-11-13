@@ -544,5 +544,6 @@ if __name__ == '__main__':
     a2 = MP3(r"C:\Users\maste\OneDrive\Music\Adam K & Soha - Twilight.mp3")
     # auto_set_year(a, 'Afrojack', 'No Beef')
     # auto_set_year(a2, 'Adam K', 'Twilight')
+    # TODO: test if file is in the format "deadmau5 & Kaskade - Remember Me.mp3"
     assert get_year(a2) == '2007'
     assert get_year(a)  == '2011'
