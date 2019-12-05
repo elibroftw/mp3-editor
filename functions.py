@@ -422,24 +422,29 @@ def get_temp_path(filename):
 
 
 def ffmpeg_helper(filename, command):
-    audio = EasyID3(filename)
-    artists = audio['artist']
-    title = audio['title']
-    album = audio['album']
-    album_artist = audio['albumartist']
-    album_cover = MP3(filename, ID3=mutagen.id3.ID3).get('APIC:')
-    temp_path = get_temp_path(filename)
-    os.rename(filename, temp_path)
-    os.system(command)
-    audio = EasyID3(filename)
-    audio['artist'] = artists
-    audio['title'] = title
-    audio['album'] = album
-    audio['albumartist'] = album_artist
-    audio.save()
-    audio = MP3(filename, ID3=mutagen.id3.ID3)
-    if album_cover is not None: audio['APIC:'] = album_cover
-    audio.save()
+    try:
+        audio = EasyID3(filename)
+        artists = audio['artist']
+        title = audio['title']
+        album = audio['album']
+        album_artist = audio['albumartist']
+        album_cover = MP3(filename, ID3=mutagen.id3.ID3).get('APIC:')
+        temp_path = get_temp_path(filename)
+        os.rename(filename, temp_path)
+        os.system(command)
+        audio = EasyID3(filename)
+        audio['artist'] = artists
+        audio['title'] = title
+        audio['album'] = album
+        audio['albumartist'] = album_artist
+        audio.save()
+        audio = MP3(filename, ID3=mutagen.id3.ID3)
+        if album_cover is not None: audio['APIC:'] = album_cover
+        audio.save()
+    except Exception:
+        temp_path = get_temp_path(filename)
+        os.rename(filename, temp_path)
+        os.system(command)
     os.remove(temp_path)
     os.remove('ffmpeg.log')
 
