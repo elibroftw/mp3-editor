@@ -247,7 +247,7 @@ def add_simple_metadata(file_path, artist='', title='', album='', albumartist=''
             elif artist.count(' ,'): artist = artist.split(' ,')
             elif artist.count(', '): artist = artist.split(', ')
             elif artist.count(','): artist = artist.split(',')
-        if not title: title = filename.split(' - ')[-1]
+        if not title: title = filename.split(' - ')[-1][:-4]
         if override:
             audio['title'] = title
             audio['artist'] = artist
