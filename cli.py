@@ -102,9 +102,9 @@ def individual_select(filename):
                 print('A genre is a semi-colon seperated list')
                 set_genre(audio, input('Enter genre(s): '))
             elif sub_menu_user_choice == 11:
-                set_year(audio, input('Enter year (YYYY):'))
+                set_year(audio, input('Enter year (YYYY): '))
             elif sub_menu_user_choice == 12:  # TODO: Rename file
-                new_filename = path.dirname(filename) + '/' + input('    Enter new file name (with extension)')
+                new_filename = path.dirname(filename) + '/' + input('    Enter new file name (with extension): ')
                 if not new_filename.count('.'): new_filename += '.mp3'
                 rename(filename, new_filename)
                 print('    File name changed from ', pathlib.Path(filename).name, 'to', pathlib.Path(new_filename).name)

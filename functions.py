@@ -360,6 +360,7 @@ def set_album_cover(file_path, img_path='', url='', copy_from='', title='', arti
     elif copy_from:
         other_audio = MP3(copy_from, ID3=mutagen.id3.ID3)
         try:
+            if 'APIC:' not in other_audio: fix_cover(other_audio)
             audio['APIC:'] = other_audio['APIC:']
             audio.save()
             return True
@@ -531,24 +532,13 @@ def get_bitrate(audio: File):
     return audio.info.bitrate
 
 
-def find_bitrates_under(files, bitrate_thresh):
+def find_bitrates_under(files, bitrate_thresh, output='low bitrate files.txt'):
     low_quality_files = []
     for file in files:
         a = File(file)
         if get_bitrate(a) < bitrate_thresh:
             low_quality_files.append(file)
-    with open(f'{starting_dir}/files under bitrate_thresh.txt', 'w') as f:
+    with open(f'{starting_dir}/{output}', 'w') as f:
         f.write('\n'.join(low_quality_files))
     return low_quality_files
-            
 
-if __name__ == '__main__':
-    # search_album_art('Afrojack', 'No Beef', return_all=True)
-    find_bitrates_under(glob(r'C:\Users\maste\OneDrive\Music\*.mp3'), 192000)
-    a = MP3(r"C:\Users\maste\OneDrive\Music\Afrojack, Steve Aoki, Miss Palmer - No Beef.mp3")
-    a2 = MP3(r"C:\Users\maste\OneDrive\Music\Adam K & Soha - Twilight.mp3")
-    # auto_set_year(a, 'Afrojack', 'No Beef')
-    # auto_set_year(a2, 'Adam K', 'Twilight')
-    # TODO: test if file is in the format "deadmau5 & Kaskade - Remember Me.mp3"
-    assert get_year(a2) == '2007'
-    assert get_year(a)  == '2011'
