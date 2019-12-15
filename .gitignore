@@ -1,4 +1,3 @@
-config.txt
 .idea
 __pycache__
 ffmpeg.log
@@ -6,5 +5,5 @@ ffmpeg.log
 config.json
 test.py
 custom_wrapper.py
-files under bitrate_thresh.txt
+custom_wrapper.bat
 low bitrate files.txt
