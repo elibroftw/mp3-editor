@@ -68,8 +68,7 @@ def individual_select(filename):
                 print('    6. Back')
                 with suppress(ValueError):
                     album_art_choice = int(input('    Enter an option (1 - 6): '))
-                    if album_art_choice == 1:
-                        add_simple_metadata(filename)
+                    if album_art_choice == 1: add_simple_metadata(filename)
                     elif album_art_choice == 2:
                         if set_album_cover(filename, url=input('    Enter url: ')): print('    Album cover set')
                     elif album_art_choice == 3:
