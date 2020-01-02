@@ -5,6 +5,8 @@ from tkinter import messagebox
 from os import chdir
 from functions import *
 import image_selector
+from win10toast import ToastNotifier
+toaster = ToastNotifier()
 center = image_selector.center
 
 
@@ -240,13 +242,13 @@ class IndividualTrackPage(tk.Frame):
         # info.pack(side=tk.LEFT)
         # buttons.pack(side=tk.RIGHT)
 
-        button2 = tk.Button(self, text='Auto set metadata and album cover', bg=bbg, activebackground=babg,
+        button2 = tk.Button(self, text='Auto-set metadata and album cover', bg=bbg, activebackground=babg,
                             command=self.auto_set_metadata)
         button2.pack(pady=10, padx=10)
         # button2.pack(in_=buttons, pady=10, padx=10)
         tk.Label(self, text='', bg=bbg).pack(in_=info, pady=10, padx=10)
 
-        button3 = tk.Button(self, text='Auto set (override) artist and title', bg=bbg, activebackground=babg,
+        button3 = tk.Button(self, text='Auto-set (override) artist and title', bg=bbg, activebackground=babg,
                             command=lambda: self.auto_set_metadata(True))
         button3.pack(pady=10, padx=10)
 
@@ -304,7 +306,8 @@ class IndividualTrackPage(tk.Frame):
         # have all the properties beside the options
 
     def auto_set_metadata(self, override=False):
-        add_simple_metadata(self.filename, override=override)
+        temp = add_simple_metadata(self.filename, override=override)
+        toaster.show_toast('Metadata Setter', f'Metadata set {"with errors" if temp else ""}', duration=3, threaded=True)
 
     def set_title(self):
         pass
@@ -337,6 +340,9 @@ class IndividualTrackPage(tk.Frame):
         pass
 
     def trim_audio(self):
+        pass
+
+    def remove_silence(self):
         pass
 
     def view_album_covers(self):
