@@ -109,7 +109,10 @@ def individual_select(filename):
                 print('    File name changed from ', pathlib.Path(filename).name, 'to', pathlib.Path(new_filename).name)
                 filename = new_filename
             elif sub_menu_user_choice == 13:
-                for k, v in easy_audio.items(): print(f'    {k}:', v)
+                print(f'    title: {easy_audio["title"][0]}')
+                print(f"    artist: {', '.join(easy_audio['artist'])}")
+                if 'album' in easy_audio: print(f'    album: {easy_audio["album"][0]}')
+                if 'date' in easy_audio: print(f'    date: {easy_audio["date"][0]}')
                 song_length = get_song_length(filename)
                 minutes = int(song_length / 60)
                 seconds = round(song_length % 60)
