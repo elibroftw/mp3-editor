@@ -12,5 +12,6 @@
 12. Rename file
 13. Print properties
 14. Trim audio
-15. Exit to main menu
-16. Reprint menu
+15. Remove (start & end) silence
+16. Exit to main menu
+17. Reprint menu

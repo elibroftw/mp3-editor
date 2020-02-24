@@ -7,7 +7,7 @@ import os
 from os import system
 from pprint import pprint
 import subprocess
-from time import time
+import time
 from urllib import parse
 from urllib.request import urlopen
 import sys
@@ -65,18 +65,17 @@ def spotify_access_token_deco(f):
 
     def helper():
         nonlocal spotify_access_token, spotify_access_token_creation
-        if time() - spotify_access_token_creation > 21600:
+        if time.time() - spotify_access_token_creation > 21600:
             spotify_access_token = f()
-            spotify_access_token_creation = time()
+            spotify_access_token_creation = time.time()
         return spotify_access_token
     
     return helper
 
 
-
 @spotify_access_token_deco
 def get_spotify_access_token():
-    spotify_access_token_creation = time()
+    spotify_access_token_creation = time.time()
     header = {'Authorization': 'Basic ' + SPOTIFY_B64_AUTH_STR}
     data = {'grant_type': 'client_credentials'}
     access_token_response = requests.post('https://accounts.spotify.com/api/token', headers=header, data=data)
@@ -160,7 +159,8 @@ def auto_set_year(audio: MP3, artist, title):
                 return True
     return False
 
-def set_year(audio: MP3, year: int):
+
+def set_year(audio: File, year: int):
     audio['TDRC'] = mutagen.id3.TDRC(encoding=3, text=year)
     audio.save()
 
@@ -269,12 +269,13 @@ def add_simple_metadata(file_path, artist='', title='', album='', albumartist=''
         if not has_album_cover(file_path):
             if not set_album_cover(file_path):
                 print(f'Album art not found for {file_path}')
-        return True
     except MutagenError:
         print(f'{filename} in use')
+        return False
     except ValueError:
         print('Error adding metadata to', filename)
         return False
+    return True
 
 
 auto_set_metadata = auto_set_simple_metadata = set_simple_meta = add_simple_metadata
@@ -416,44 +417,39 @@ def set_album_cover(file_path, img_path='', url='', copy_from='', title='', arti
 add_mp3_cover = add_album_cover = set_album_cover
 
 
+def get_song_length(filename):
+    return File(filename).info.length
+
+
 def get_temp_path(filename):
-    base = os.path.basename(filename)
-    base = f'BACKUP {base}'
+    temp_path = f'BACKUP {os.path.basename(filename)}'
     directory = os.path.dirname(filename)
-    temp_path = directory + '/' + base
+    if directory:
+        if platform.system() == 'Windows': return directory + '\\' + temp_path
+        return directory + '/' + temp_path
     return temp_path
 
 
 def ffmpeg_helper(filename, command):
-    try:
-        audio = EasyID3(filename)
-        artists = audio['artist']
-        title = audio['title']
-        album = audio['album']
-        album_artist = audio['albumartist']
-        album_cover = MP3(filename, ID3=mutagen.id3.ID3).get('APIC:')
-        temp_path = get_temp_path(filename)
-        os.rename(filename, temp_path)
-        os.system(command)
-        audio = EasyID3(filename)
-        audio['artist'] = artists
-        audio['title'] = title
-        audio['album'] = album
-        audio['albumartist'] = album_artist
-        audio.save()
-        audio = MP3(filename, ID3=mutagen.id3.ID3)
-        if album_cover is not None: audio['APIC:'] = album_cover
-        audio.save()
-    except Exception:
-        temp_path = get_temp_path(filename)
-        os.rename(filename, temp_path)
-        os.system(command)
+    temp_path = get_temp_path(filename)
+    audio = EasyID3(filename)
+    artists = audio['artist']
+    title = audio['title']
+    album = audio['album']
+    album_artist = audio['albumartist']
+    album_cover = MP3(filename, ID3=mutagen.id3.ID3).get('APIC:')
+    os.rename(filename, temp_path)
+    process_output = subprocess.check_output(command, shell=True)
+    audio = EasyID3(filename)
+    audio['artist'] = artists
+    audio['title'] = title
+    audio['album'] = album
+    audio['albumartist'] = album_artist
+    audio.save()
+    audio = MP3(filename, ID3=mutagen.id3.ID3)
+    if album_cover is not None: audio['APIC:'] = album_cover
+    audio.save()
     os.remove(temp_path)
-    os.remove('ffmpeg.log')
-
-
-def get_song_length(filename):
-    return File(filename).info.length
 
 
 def trim(filename, start, end):
@@ -470,15 +466,18 @@ def trim(filename, start, end):
     with suppress(ValueError): end = float(end)
     if type(start) == str or type(end) == str: return False
     temp_path = get_temp_path(filename)
-    command = f'ffmpeg -i "{temp_path}" -ss {start} -t {end} -c copy "{filename}" > ffmpeg.log 2>&1'
+    command = f'ffmpeg -i "{temp_path}" -ss {start} -t {end} -c copy "{filename}" -loglevel quiet'
     ffmpeg_helper(filename, command)
     return True
 
 
 def remove_silence(filename):
     temp_path = get_temp_path(filename)
+    if platform.system() == 'Windows':
+        temp_path = temp_path.replace('/', '\\')
+        filename.replace('/', '\\')
     command = f'ffmpeg -i "{temp_path}" -af silenceremove=start_periods=1:stop_periods=1:detection=peak "{filename}" ' \
-              f'> ffmpeg.log 2>&1'
+              f'-loglevel quiet'
     ffmpeg_helper(filename, command)
 
 
