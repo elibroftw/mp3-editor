@@ -68,7 +68,7 @@ def individual_select(filename):
                 print('    5. Manual')
                 print('    6. Back')
                 with suppress(ValueError):
-                    album_art_choice = int(input('    Enter an option (1 - 6): '))
+                    album_art_choice = int(input('    Enter an option (1 - 8): '))
                     if album_art_choice == 1: add_simple_metadata(filename)
                     elif album_art_choice == 2:
                         if set_album_cover(filename, url=input('    Enter url: ')): print('    Album cover set')
@@ -156,9 +156,9 @@ def main():
             print('4. View mp3 files in directory')
             print('5. Search for album covers')  # make menu better
             print('6. Optimize all album covers')
-            print('7. Remove (starting & ending) silence from all files')
+            print('7. Trim (remove starting & ending) silence from all files')
             print('8. Exit')
-        try: user_choice = int(input('Enter an option [1 - 7]: '))
+        try: user_choice = int(input('Enter an option [1 - 8]: '))
         except ValueError: user_choice = 0
         output_intro = True
         if user_choice == 1:
