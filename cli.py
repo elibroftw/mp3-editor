@@ -151,7 +151,7 @@ def main():
         if output_intro:
             print('Welcome to Metadata Editor by Elijah Lopez')
             print(f'1. Change Directory (currently: {music_directory})')
-            print('2. Auto-set missing metadata, album covers (optimized), and trim silence')
+            print('2. Auto-set missing metadata and album covers (optimized)')
             print('3. Select an individual track')
             print('4. View mp3 files in directory')
             print('5. Search for album covers')  # make menu better
@@ -168,22 +168,22 @@ def main():
                 chdir(music_directory)
                 print('Directory changed to', music_directory)
         elif user_choice == 2:
-            started_threads = []
-            n_started_threads = []
+            # started_threads = []
+            # n_started_threads = []
             for file in tqdm(glob('*.mp3'), desc='Setting metadata'):
                 if add_simple_metadata(file):
                     optimize_cover(MP3(file))
-                    t = threading.Thread(target=remove_silence, args=[os.path.abspath(file)])
-                    if threading.active_count() < 10:
-                        started_threads.append(t)
-                        t.start()
-                    else: n_started_threads.append(t)
-            for t in tqdm(n_started_threads, desc='Start Trimming Silence Threads'):
-                while threading.active_count() > 15: time.sleep(1)
-                t.start()
-                started_threads.append(t)
-            for t in tqdm(started_threads, desc='Trimming Silence'):
-                t.join()
+            #         t = threading.Thread(target=remove_silence, args=[os.path.abspath(file)])
+            #         if threading.active_count() < 10:
+            #             started_threads.append(t)
+            #             t.start()
+            #         else: n_started_threads.append(t)
+            # for t in tqdm(n_started_threads, desc='Start Trimming Silence Threads'):
+            #     while threading.active_count() > 15: time.sleep(1)
+            #     t.start()
+            #     started_threads.append(t)
+            # for t in tqdm(started_threads, desc='Trimming Silence'):
+            #     t.join()
             print('Done')
         elif user_choice == 3:
             root.deiconify()
