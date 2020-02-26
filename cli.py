@@ -108,11 +108,14 @@ def individual_select(filename):
             elif sub_menu_user_choice == 11:
                 set_year(audio, int(input('Enter year (YYYY): ')))
             elif sub_menu_user_choice == 12:  # TODO: Rename file
-                new_filename = path.dirname(filename) + '/' + input('    Enter new file name (with extension): ')
-                if not new_filename.count('.'): new_filename += '.mp3'
-                rename(filename, new_filename)
-                print('    File name changed from ', pathlib.Path(filename).name, 'to', pathlib.Path(new_filename).name)
-                filename = new_filename
+                new_filename = path.dirname(filename) + '/' + input('    Enter new file name: ')
+                if new_filename and not new_filename.count('.'): new_filename += os.path.splitext(filename)[1]
+                if new_filename:
+                    rename(filename, new_filename)
+                    print('    File name changed from ', pathlib.Path(filename).name, 'to', pathlib.Path(new_filename).name)
+                    filename = new_filename
+                else:
+                    print('    Renaming cancelled')
             elif sub_menu_user_choice == 13:
                 print(f'    title: {easy_audio["title"][0]}')
                 print(f"    artist: {', '.join(easy_audio['artist'])}")
