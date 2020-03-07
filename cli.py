@@ -35,8 +35,9 @@ def individual_select(filename):
             easy_audio = EasyID3(filename)
             audio = File(filename)
         except mutagen.id3.ID3NoHeaderError:
-            audio = mutagen.File(filename, easy=True)
+            audio = mutagen.File(filename)
             audio.add_tags()
+            audio.save()
             easy_audio = EasyID3(filename)
         except PermissionError: break
         try:
