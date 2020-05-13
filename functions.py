@@ -403,7 +403,7 @@ def set_album_cover(file_path, img_path='', url='', copy_from='', title='', arti
     data = io.BytesIO(image_data)
     im = Image.open(data)
     image_data = io.BytesIO()
-    im.save(image_data, optimize=True, format=image_format)
+    im.save(image_data, optimize=True, format=image_format, quality=95)
     audio['APIC:'] = mutagen.id3.APIC(
         encoding=0,
         mime=mime,
@@ -506,8 +506,8 @@ def optimize_cover(audio: MP3):
         data = io.BytesIO(data)
         im = Image.open(data)
         new_data = io.BytesIO()
-        try: im.save(new_data, optimize=True, format='JPEG')
-        except OSError: im.convert('RGB').save(new_data, optimize=True, format='JPEG')
+        try: im.save(new_data, optimize=True, format='JPEG', quality=95)
+        except OSError: im.convert('RGB').save(new_data, optimize=True, format='JPEG', quality=95)
         if len(data.getvalue()) - len(new_data.getvalue()) > 0:
             audio['APIC:'] = mutagen.id3.APIC(encoding=0, mime='image/jpeg', type=3, data=new_data.getvalue())
             audio.save()
