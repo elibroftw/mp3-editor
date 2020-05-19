@@ -14,13 +14,14 @@ from functions import copy
 
 def center(top_level):
     top_level.update_idletasks()
-    w = top_level.winfo_screenwidth()
-    h = top_level.winfo_screenheight()
-    size = tuple(int(_) for _ in top_level.geometry().split('+')[0].split('x'))
-    x = w / 2 - size[0] / 2
-    y = h / 2 - size[1] / 2 - 100
-    # noinspection PyStringFormat
-    top_level.geometry('%dx%d+%d+%d' % (size + (x, y)))
+    w, h = top_level.winfo_screenwidth(), top_level.winfo_screenheight()
+    size = tuple(int(_) for _ in top_level.geometry().split('+', 1)[0].split('x'))
+    # x = int(w / 2 - size[0] / 2)
+    # y = int(h / 2 - size[1] / 2 - 100)
+    y = int(h / 2 - top_level.winfo_height() / 2 - 100)
+    x = int(w / 2 - top_level.winfo_width() / 2)
+    top_level.geometry(f'+{x}+{y}')
+    # top_level.geometry('%dx%d+%d+%d' % (size + (x, y)))
 
 
 current_image_index = 0
@@ -30,24 +31,24 @@ toaster = ToastNotifier()
 #     images = [Image.open(io.BytesIO(image)) for image in image_bits]
 
 
-def image_selector(image_urls=[], artist='', track='', image_bits=[]):
+def image_selector(image_urls=None, artist='', track='', image_bits=None, root=None):
+    if image_bits is None: image_bits = []
+    if image_urls is None: image_urls = []
     global current_image_index
-    if __name__ == '__main__':  root = tk.Tk()
+    if root is None:
+        root_is_main = True
+        root = tk.Tk()
     else:
-        root = tk.Toplevel()
-        root.geometry('800x480')
-        root.deiconify()
-        root.focus_force()
+        root_is_main = False
+        root = tk.Toplevel(root)
 
-    root.wm_title('Image selector')
-    # images = {}
+    root.wm_title('Image Selector')
     current_image_index = 0
-    if image_urls:
-        images = image_urls.copy()
-    elif image_bits:
-        images = image_bits.copy()
+
+    if image_urls: images = image_urls.copy()
+    elif image_bits: images = image_bits.copy()
     else:
-        print('error, no images to display')
+        print('ERROR: no images to display')
         return
     images_data = {}
 
@@ -68,10 +69,13 @@ def image_selector(image_urls=[], artist='', track='', image_bits=[]):
         # 2. download image to location
 
     pop_up = tk.Menu(tearoff=0)  # image right click menu
+    pop_up.config(bg='black', fg='#eee', bd=0, activebackground='#242424')
+    image_exists_commands = [('Copy URL', copy_url), ('Open in browser', open_browser)]
+    right_click_commands = [('Save to device', save_to_device)]
     if image_urls:
-        pop_up.add_command(label='Copy URL', command=copy_url)
-        pop_up.add_command(label='Open in browser', command=open_browser)
-    pop_up.add_command(label='Save to device', command=save_to_device)
+        right_click_commands = image_exists_commands + right_click_commands
+    for label, cmd in right_click_commands:
+        pop_up.add_command(label=label, command=cmd, background='black', font=('Verdana', 10))
 
     def image_right_click(event):
         pop_up.post(event.x_root, event.y_root)
@@ -122,21 +126,25 @@ def image_selector(image_urls=[], artist='', track='', image_bits=[]):
         root.withdraw()
         root.quit()
 
-    button_font = Font(family='Verdana', size=11)
+    default_font = Font(family='Verdana', size=11)
     bg = '#0EABE0'
     abg = '#68CBED'
 
-    label2 = tk.Label(root, text=f'Image 1/{len(images)}', foreground='white', width=15, font=button_font,
+    label2 = tk.Label(root, text=f'Image 1/{len(images)}', foreground='white', width=15, font=default_font,
                       borderwidth=0, background='#121212')
     label2.grid(row=1, column=3)
 
     if track and artist:
-        search_label = tk.Label(root, text=f'TRACK\n{track}\n\nARTIST\n{artist}', foreground='white',
-                                width=max(len(track), len(artist), 15), font=button_font, borderwidth=0,
+        # TODO: make fancier
+        artist = artist.replace(', ', ',\n')
+        search_label_text = f'TRACK\n{track}\n\nARTIST(S)\n{artist}'
+        lft_side_width = max([15] + [len(line) for line in search_label_text.splitlines()])
+        search_label = tk.Label(root, text=search_label_text, foreground='white',
+                                width=lft_side_width, font=default_font, borderwidth=0,
                                 background='#121212')
         search_label.grid(row=1, column=1)
-
-    tk.Button(root, command=prev_image, text='Previous image', width=15, font=button_font, background=bg,
+    else: lft_side_width = 15
+    tk.Button(root, command=prev_image, text='Previous image', width=lft_side_width, font=default_font, background=bg,
               activebackground=abg, borderwidth=0).grid(row=2, column=1)
     root.bind('<Left>', lambda _: prev_image())
     root.bind('a', lambda _: prev_image())
@@ -146,12 +154,12 @@ def image_selector(image_urls=[], artist='', track='', image_bits=[]):
     root.bind('<Down>', lambda _: prev_image())
 
     if image_urls:
-        tk.Button(root, command=select_image, text='Select', width=15, font=button_font, background=bg,
+        tk.Button(root, command=select_image, text='Select', width=15, font=default_font, background=bg,
                 activebackground=abg, borderwidth=0).grid(row=2, column=2)
         root.bind('<space>', lambda _: select_image())
         root.bind('<Return>', lambda _: select_image())
 
-    tk.Button(root, command=next_image, text='Next image', width=15, font=button_font, background=bg,
+    tk.Button(root, command=next_image, text='Next image', width=15, font=default_font, background=bg,
               activebackground=abg, borderwidth=0).grid(row=2, column=3)
     image_label.bind('<Button-1>', lambda _: next_image())
     root.bind('<Right>', lambda _: next_image())
@@ -170,8 +178,11 @@ def image_selector(image_urls=[], artist='', track='', image_bits=[]):
 
     root.configure(background='#121212')
     root.resizable(False, False)
-    root.protocol("WM_DELETE_WINDOW", on_close)
+    root.protocol('WM_DELETE_WINDOW', on_close)
     center(root)
+    if not root_is_main:
+        root.deiconify()
+        root.lift()
     root.mainloop()
 
 

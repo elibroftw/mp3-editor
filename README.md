@@ -24,11 +24,12 @@ This program assumes that a audio file onyl requires at most one album cover.
 Optimize covers converts PNG images to JPEG.
 
 # config.json format
-
+```json
 {
-    "MUSIC_LOCATION": "path/no quotation marks/music directory",
+    "MUSIC_FOLDERS": ["paths/no quotation marks/music directory"],
     "SPOTIFY_CLIENT_ID": "your_client_id",
     "SPOTIFY_SECRET": "your_secret",
-    "LASTFM_API": "not_needed",
-    "LASTFM_SECRET": "not_needed"
+    "LASTFM_API": "OPTIONAL",
+    "LASTFM_SECRET": "OPTIONAL"
 }
+```

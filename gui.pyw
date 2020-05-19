@@ -11,7 +11,7 @@ center = image_selector.center
 
 
 LARGE_FONT = ('Verdana', 12)
-music_directory = config.get('MUSIC_LOCATION', '')
+music_folders = config.get('MUSIC_LOCATION', '')
 # bbg = '#4285f4'  # button background
 bbg = '#0088ff'
 babg = '#00bbff'  # button active background
@@ -56,7 +56,7 @@ class MainGUI(tk.Tk):
 class StartPage(tk.Frame):
 
     def __init__(self, parent, controller):
-        global music_directory
+        global music_folders
         while music_directory == '' or not os.path.exists(music_directory):
             music_directory = filedialog.askdirectory(title='Select Music Directory')
         music_directory = music_directory.replace('\\', '/')
@@ -94,7 +94,7 @@ class StartPage(tk.Frame):
         # self.focus()
 
     def change_directory(self):
-        global music_directory
+        global music_folders
         old_length = len(music_directory)
         temp_music_directory = filedialog.askdirectory(title='Select Music Directory')
         if os.path.exists(temp_music_directory):
@@ -113,7 +113,7 @@ class StartPage(tk.Frame):
         # TODO: status message
 
     def select_individual_track(self):
-        file = filedialog.askopenfilename(initialdir=f'{music_directory}', title='Select track',
+        file = filedialog.askopenfilename(initialdir=f'{music_folders}', title='Select track',
                                           filetypes=[('Audio', '*.mp3')])
         if file:
             self.bind_on_frame_change()
@@ -123,7 +123,7 @@ class StartPage(tk.Frame):
     def view_music_files(self):
         self.bind_on_frame_change()
         self.unbind_numbers()
-        self.controller.show_frame(MusicFilesPage, {'directory': music_directory})
+        self.controller.show_frame(MusicFilesPage, {'directory': music_folders})
 
     def search_for_album_covers(self):
         self.bind_on_frame_change()

@@ -4,31 +4,70 @@ import threading
 try:
     from tqdm import tqdm
     from functions import *
-    from image_selector import image_selector
+    from image_selector import image_selector, center
 except ImportError as e:
     print(e)
     input('Press Enter to exit....')
     sys.exit()
 
-starting_directory = getcwd()
-root = tk.Tk()
-root.withdraw()
-music_directory = config.get('MUSIC_LOCATION', '')
-while music_directory == '' or not os.path.exists(music_directory):
-    music_directory = tk.filedialog.askdirectory(title='Select Music Directory')
 
-music_directory = music_directory.replace('\\', '/')
-if config.get('MUSIC_LOCATION', '') != music_directory:
-    config['MUSIC_LOCATION'] = music_directory
+def init_tkinter():
+    global root
+    if root is None:
+        root = tk.Tk()
+        root.withdraw()
+    # root.focus_force()
+
+
+MAIN_MENU = '''
+1. Auto-set missing metadata and album covers (optimized)
+2. Select an individual track
+3. View mp3 files in directories
+4. Search for album covers
+5. Optimize all album covers
+6. Trim (remove starting & ending) silence from all files
+7. Exit
+'''
+INDIVIDUAL_MENU = '''
+1. Auto set simple metadata and album art
+2. Auto set artist and title (overriding)
+3. Set title
+4. Set artist(s)
+5. Set album
+6. Set album artist
+7. Set album cover (auto, url, local image, from another file, manual search)
+8. Optimize album cover
+9. View album covers
+10. Set genre (BETA)
+11. Set year  (BETA)
+12. Rename file
+13. Print properties
+14. Trim audio
+15. Remove (start & end) silence
+16. Exit to main menu
+17. Reprint menu
+'''
+starting_directory = getcwd()
+root = None
+music_folders = config.get('MUSIC_FOLDERS', [])
+while not music_folders or not os.path.exists(music_folders[0]):
+    init_tkinter()
+    music_folder = tk.filedialog.askdirectory(title='Select Music Directory')
+    if music_folders: music_folders[0] = music_folder
+    else: music_folders.append(music_folder)
+
+for i, folder in enumerate(music_folders):
+    music_folders[i] = folder.replace('\\', '/')
+# music_folders = music_folders.replace('\\', '/')
+if config.get('MUSIC_FOLDERS', []) != music_folders:
+    config['MUSIC_FOLDERS'] = music_folders
     with open('config.json', 'w') as json_file: json.dump(config, json_file, indent=4)
 
 
 def individual_select(filename):
-    global music_directory, root
-    with open(starting_directory+'/individual_select.txt') as f:
-        individual_select_menu_text = f.read()
+    global music_folders, root
     print('You selected:', filename)
-    print(individual_select_menu_text)
+    print(INDIVIDUAL_MENU)
     on_menu = True
     while on_menu:
         try:
@@ -74,17 +113,15 @@ def individual_select(filename):
                     elif album_art_choice == 2:
                         if set_album_cover(filename, url=input('    Enter url: ')): print('    Album cover set')
                     elif album_art_choice == 3:
-                        root.deiconify()
-                        root.focus_force()
+                        init_tkinter()
                         img_path = tk.filedialog.askopenfilename(title='Select album cover',
                                                                  filetypes=[('Image', '*.jpg *.jpeg *.png')])
                         if set_album_cover(filename, img_path=img_path):
                             print(f'    Album cover set')
                         root.withdraw()
                     elif album_art_choice == 4:
-                        root.deiconify()
-                        root.focus_force()
-                        copy_from = tk.filedialog.askopenfilename(initialdir=music_directory, title='Select 2nd track',
+                        init_tkinter()
+                        copy_from = tk.filedialog.askopenfilename(initialdir=music_folders[0], title='Select 2nd track',
                                                                   filetypes=[('Audio', '*.mp3')])
                         if not set_album_cover(filename, copy_from=copy_from):
                             print(f'    Album cover not found for: {filename}')
@@ -95,14 +132,16 @@ def individual_select(filename):
                         search_artist = input('    Enter the artist: ')
                         results = search_album_art(search_artist, search_title, return_all=True)
                         if results:
-                            image_selector(results, artist=search_artist, track=search_title)
+                            init_tkinter()
+                            image_selector(results, artist=search_artist, track=search_title, root=root)
                             url = os.environ.pop('SELECTED_URL', None)
                             if url and set_album_cover(filename, url=url): print('    Album cover set')
                         else: print('    No album covers found :(')
             elif sub_menu_user_choice == 9:
                 covers = [audio[key].data for key in audio.keys() if key.startswith('APIC')]
-                # root.lift()
-                image_selector(image_bits=covers, artist=', '.join(easy_audio['artist']), track=easy_audio['title'][0])
+                init_tkinter()
+                artists = ', '.join(easy_audio['artist'])
+                image_selector(image_bits=covers, artist=artists, track=easy_audio['title'][0], root=root)
             elif sub_menu_user_choice == 10:
                 print('A genre is a semi-colon separated list')
                 set_genre(audio, input('Enter genre(s): '))
@@ -142,36 +181,24 @@ def individual_select(filename):
                 remove_silence(filename)
                 print('Silence Removed')
             elif sub_menu_user_choice == 16: on_menu = False
-            else: print(individual_select_menu_text)
+            else: print(INDIVIDUAL_MENU)
             if 0 > sub_menu_user_choice or sub_menu_user_choice > 17: print('Please enter an integer from 1 to 15')
         except ValueError: print('Please enter an integer from 1 to 15')
 
 
 def main():
-    global music_directory, root
-    chdir(music_directory)
+    global music_folders, root
+    chdir(music_folders[0])
     output_intro = True
     while True:
         if output_intro:
             print('Welcome to Metadata Editor by Elijah Lopez')
-            print(f'1. Change Directory (currently: {music_directory})')
-            print('2. Auto-set missing metadata and album covers (optimized)')
-            print('3. Select an individual track')
-            print('4. View mp3 files in directory')
-            print('5. Search for album covers')  # make menu better
-            print('6. Optimize all album covers')
-            print('7. Trim (remove starting & ending) silence from all files')
-            print('8. Exit')
-        try: user_choice = int(input('Enter an option [1 - 8]: '))
-        except ValueError: user_choice = 0
+            print(f'Directories: {"; ".join(music_folders)}')
+            print(MAIN_MENU)
+        try: main_choice = int(input('Enter an option [1 - 8]: '))
+        except ValueError: main_choice = 0
         output_intro = True
-        if user_choice == 1:
-            music_directory = tk.filedialog.askdirectory(title='Select Music Directory')
-            root.withdraw()
-            if os.path.exists(music_directory):
-                chdir(music_directory)
-                print('Directory changed to', music_directory)
-        elif user_choice == 2:
+        if main_choice == 1:
             # started_threads = []
             # n_started_threads = []
             for file in tqdm(glob('*.mp3'), desc='Setting metadata'):
@@ -189,43 +216,44 @@ def main():
             # for t in tqdm(started_threads, desc='Trimming Silence'):
             #     t.join()
             print('Done')
-        elif user_choice == 3:
-            root.deiconify()
-            root.focus_force()
-            file = tk.filedialog.askopenfilename(initialdir=music_directory, title='Select track',
+        elif main_choice == 2:
+            init_tkinter()
+            file = tk.filedialog.askopenfilename(initialdir=music_folders, title='Select track',
                                                  filetypes=[('Audio', '*.mp3')])
-            root.withdraw()
             if file: individual_select(file)
-        elif user_choice == 4:
-            files = glob('*.mp3')
-            for i, file in enumerate(files): print(f'{i + 1}. {file}')
+        elif main_choice == 3:
+            files = []
+            for _folder in music_folders:
+                files += glob(f'{_folder}/**/*.mp3', recursive=True)
+            for index, file in enumerate(files): print(f'{index + 1}. {file}')
             print('Enter an integer to select the corresponding file')
             print('Entering anything else will take you back to the main menu')
             with suppress(ValueError, IndexError): individual_select(files[int(input()) - 1])
-        elif user_choice == 5:
+        elif main_choice == 4:
             search_title = input('Enter the title: ')
             search_artist = input('Enter the artist: ')
             results = search_album_art(search_artist, search_title, return_all=True)
             if results:
-                image_selector(results, artist=search_artist, track=search_title)
+                init_tkinter()
+                image_selector(results, artist=search_artist, track=search_title, root=root)
                 url = os.environ.pop('SELECTED_URL', None)
                 if url:
                     if copy(url): print('Copied url to clipboard!')
                     else: print(url)
             else: print('No album covers found :(')
-        elif user_choice == 6:
+        elif main_choice == 5:
             for file in tqdm(glob('*.mp3'), desc='Optimizing covers'):
                 with suppress(PermissionError, mutagen.MutagenError):
                     temp = MP3(file)
                     fix_cover(temp)
                     optimize_cover(temp)
             print('Optimized album covers for all tracks')
-        elif user_choice == 7:
+        elif main_choice == 6:
             for file in tqdm(glob('*.mp3'), desc='Optimizing covers'):
                 with suppress(PermissionError, mutagen.MutagenError):
                     remove_silence(file)
             print('Removed silence from for all tracks')
-        elif user_choice == 8: return
+        elif main_choice == 7: return
         else:
             output_intro = False
             print('Please enter an integer from 1 to 7')

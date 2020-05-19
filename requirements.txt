@@ -5,3 +5,4 @@ Pillow
 requests
 win10toast
 tqdm
+PySimpleGui
