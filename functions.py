@@ -14,7 +14,7 @@ import sys
 import re
 
 
-try:   
+try:
     import shlex
     import platform
     import pathlib
@@ -69,7 +69,7 @@ def spotify_access_token_deco(f):
             spotify_access_token = f()
             spotify_access_token_creation = time.time()
         return spotify_access_token
-    
+
     return helper
 
 
@@ -160,7 +160,7 @@ def auto_set_year(audio: MP3, artist, title):
     return False
 
 
-def set_year(audio: File, year: int):
+def set_year(audio: File, year: str):
     audio['TDRC'] = mutagen.id3.TDRC(encoding=3, text=year)
     audio.save()
 
@@ -261,7 +261,7 @@ def add_simple_metadata(file_path, artist='', title='', album='', albumartist=''
             if 'artist' not in audio: audio['artist'] = artist
             if 'albumartist' not in audio:
                 if albumartist: audio['albumartist'] = albumartist
-                else: audio['albumartist'] = artist        
+                else: audio['albumartist'] = artist
         audio.save()
         audio = MP3(file_path)
         if artist and title and override or audio.get('TDRC', False):
@@ -542,4 +542,3 @@ def find_bitrates_under(files, bitrate_thresh, output='low bitrate files.txt'):
     with open(f'{starting_dir}/{output}', 'w') as f:
         f.write('\n'.join(low_quality_files))
     return low_quality_files
-
