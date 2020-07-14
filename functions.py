@@ -523,7 +523,9 @@ def fix_cover(audio: File):
     restart = False
     for k in audio.keys():
         if k.startswith('APIC:') and k != 'APIC:':
-            audio['APIC:'] = audio.pop(k)
+            apic = audio.pop(k)
+            apic.desc = ''
+            audio['APIC:'] = apic
             audio.save()
             restart = True
             break
