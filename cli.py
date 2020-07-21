@@ -96,10 +96,17 @@ def individual_select(filename):
                 set_artists(easy_audio, artists)
                 print('    Artist(s) set')
             elif sub_menu_user_choice == 5:
-                set_album(easy_audio, input('    Enter album: '))
-                print('    Album set')
+                album = input('    Enter album: ')
+                if album:
+                    set_album(easy_audio, album)
+                    print('    Album set')
+                else: print('    Cancelled')
             elif sub_menu_user_choice == 6:
-                set_album_artist(easy_audio, input('    Enter album artist: '))
+                album_artist = input('    Enter album artist: ')
+                if album_artist:
+                    set_album_artist(easy_audio, album_artist)
+                    print('    Album artist set')
+                else: print('    Cancelled')
             elif sub_menu_user_choice == 7:
                 print('    1. Auto')
                 print('    2. Url')
