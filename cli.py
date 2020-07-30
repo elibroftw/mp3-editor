@@ -30,22 +30,21 @@ MAIN_MENU = '''
 '''
 INDIVIDUAL_MENU = '''
 1. Auto set simple metadata and album art
-2. Auto set artist and title (overriding)
-3. Set title
-4. Set artist(s)
-5. Set album
-6. Set album artist
-7. Set album cover (auto, url, local image, from another file, manual search)
-8. Optimize album cover
-9. View album covers
-10. Set genre (BETA)
-11. Set year  (BETA)
-12. Rename file
-13. Print properties
-14. Trim audio
-15. Remove (start & end) silence
-16. Exit to main menu
-17. Reprint menu
+2. Set title
+3. Set artist(s)
+4. Set album
+5. Set album artist
+6. Set album cover (auto, url, local image, from another file, manual search)
+# Optimize album cover (DISALBED)
+8. View album covers
+9. Set genre (BETA)
+10. Set year  (BETA)
+11. Rename file
+12. Print properties
+13. Trim audio
+14. Remove (start & end) silence
+15. Exit to main menu
+16. Reprint menu
 '''
 starting_directory = getcwd()
 root = None
@@ -85,29 +84,33 @@ def individual_select(filename):
                 add_simple_metadata(filename)
                 print('    Simple metadata set')
             elif sub_menu_user_choice == 2:
-                add_simple_metadata(filename, override=True)
-                print('    Simple metadata set')
+                title = input('    Enter title: ')
+                if title:
+                    set_title(easy_audio, title)
+                    print('    Title set')
+                else:
+                    print('    Cancelled')
             elif sub_menu_user_choice == 3:
-                set_title(easy_audio, input('    Enter title: '))
-                print('    Title set')
-            elif sub_menu_user_choice == 4:
                 artists = input('    Enter artist(s) (comma separated eg. "Calvin Harris, Alesso"): ')
-                if ', ' in artists: artists = artists.split(', ')
-                set_artists(easy_audio, artists)
-                print('    Artist(s) set')
-            elif sub_menu_user_choice == 5:
+                if artists:
+                    if ', ' in artists: artists = artists.split(', ')
+                    set_artists(easy_audio, artists)
+                    print('    Artist(s) set')
+                else:
+                    print('    Cancelled')
+            elif sub_menu_user_choice == 4:
                 album = input('    Enter album: ')
                 if album:
                     set_album(easy_audio, album)
                     print('    Album set')
                 else: print('    Cancelled')
-            elif sub_menu_user_choice == 6:
+            elif sub_menu_user_choice == 5:
                 album_artist = input('    Enter album artist: ')
                 if album_artist:
                     set_album_artist(easy_audio, album_artist)
                     print('    Album artist set')
                 else: print('    Cancelled')
-            elif sub_menu_user_choice == 7:
+            elif sub_menu_user_choice == 6:  # set album cover
                 print('    1. Auto')
                 print('    2. Url')
                 print('    3. Local Image')
@@ -144,17 +147,17 @@ def individual_select(filename):
                             url = os.environ.pop('SELECTED_URL', None)
                             if url and set_album_cover(filename, url=url): print('    Album cover set')
                         else: print('    No album covers found :(')
-            elif sub_menu_user_choice == 9:
+            elif sub_menu_user_choice == 8:  # view album covers
                 covers = [audio[key].data for key in audio.keys() if key.startswith('APIC')]
                 init_tkinter()
                 artists = ', '.join(easy_audio['artist'])
                 image_selector(image_bits=covers, artist=artists, track=easy_audio['title'][0], root=root)
+            elif sub_menu_user_choice == 9:
+                genres = input('Enter genres (comma separated, e.g. "Hip-Hop, House"): ')
+                if genres: set_genre(audio, genres.split(', '))
             elif sub_menu_user_choice == 10:
-                print('A genre is a semi-colon separated list')
-                set_genre(audio, input('Enter genre(s): '))
-            elif sub_menu_user_choice == 11:
                 set_year(audio, input('Enter year (YYYY): '))
-            elif sub_menu_user_choice == 12:  # TODO: Rename file
+            elif sub_menu_user_choice == 11:  # TODO: Rename file
                 new_filename = path.dirname(filename) + '/' + input('    Enter new file name: ')
                 if new_filename and not new_filename.count('.'): new_filename += os.path.splitext(filename)[1]
                 if new_filename:
@@ -163,7 +166,7 @@ def individual_select(filename):
                     filename = new_filename
                 else:
                     print('    Renaming cancelled')
-            elif sub_menu_user_choice == 13:
+            elif sub_menu_user_choice == 12:
                 print(f'    title: {easy_audio["title"][0]}')
                 print(f"    artist: {', '.join(easy_audio['artist'])}")
                 if 'album' in easy_audio: print(f'    album: {easy_audio["album"][0]}')
@@ -176,20 +179,20 @@ def individual_select(filename):
                 print('    song length:', song_length)
                 print('    album cover:', has_album_cover(audio))
                 print('    bitrate:', get_bitrate(audio))
-            elif sub_menu_user_choice == 14:
+            elif sub_menu_user_choice == 13:
                 start = input('    Enter start time (seconds / MM:SS): ')
                 end = input('    Enter end time (seconds / MM:SS): ')
                 del audio
                 del easy_audio
                 if trim(filename, start, end): print('Successfully trimmed file')
                 else: print('Incorrect format given')
-            elif sub_menu_user_choice == 15:
+            elif sub_menu_user_choice == 14:
                 print('Removing silence...')
                 remove_silence(filename)
                 print('Silence Removed')
-            elif sub_menu_user_choice == 16: on_menu = False
+            elif sub_menu_user_choice == 15: on_menu = False
             else: print(INDIVIDUAL_MENU)
-            if 0 > sub_menu_user_choice or sub_menu_user_choice > 17: print('Please enter an integer from 1 to 15')
+            if 0 > sub_menu_user_choice or sub_menu_user_choice > 16: print('Please enter an integer from 1 to 15')
         except ValueError: print('Please enter an integer from 1 to 15')
 
 
