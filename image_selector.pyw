@@ -8,7 +8,7 @@ import webbrowser
 import urllib.request
 
 from win10toast import ToastNotifier
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, UnidentifiedImageError
 from functions import copy
 
 
@@ -172,7 +172,7 @@ def image_selector(image_urls=None, artist='', track='', image_bits=None, root=N
     root.bind('<Escape>', lambda _: on_close())
     root.bind('<q>', lambda _: on_close())
     root.bind('<Q>', lambda _: on_close())
-    
+
     root.bind('c', lambda _: copy_url())
     root.bind('C', lambda _: copy_url())
 

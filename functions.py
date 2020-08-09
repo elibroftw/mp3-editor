@@ -264,8 +264,8 @@ def add_simple_metadata(file_path, artist='', title='', album='', albumartist=''
                 else: audio['albumartist'] = artist
         audio.save()
         audio = MP3(file_path)
-        if artist and title and override or audio.get('TDRC', False):
-            auto_set_year(audio, artist, title)
+        # if artist and title and override or audio.get('TDRC', False):
+        #     auto_set_year(audio, artist, title)
         if not has_album_cover(file_path):
             if not set_album_cover(file_path):
                 print(f'Album art not found for {file_path}')

@@ -1,10 +1,11 @@
 from os import chdir, rename, path, getcwd
 import tkinter as tk
 import threading
+import sys
 try:
     from tqdm import tqdm
     from functions import *
-    from image_selector import image_selector, center
+    from image_selector import image_selector, center, UnidentifiedImageError
 except ImportError as e:
     print(e)
     input('Press Enter to exit....')
@@ -151,7 +152,14 @@ def individual_select(filename):
                 covers = [audio[key].data for key in audio.keys() if key.startswith('APIC')]
                 init_tkinter()
                 artists = ', '.join(easy_audio['artist'])
-                image_selector(image_bits=covers, artist=artists, track=easy_audio['title'][0], root=root)
+                try:
+                    image_selector(image_bits=covers, artist=artists, track=easy_audio['title'][0], root=root)
+                except UnidentifiedImageError:
+                    print('ERROR: invalid image data. Auto setting album cover now')
+                    if set_album_cover(filename): print('Album art set')
+                    else: print('Album art could not be found automatically')
+                    print('Exiting due to tkinter errors...')
+                    sys.exit()
             elif sub_menu_user_choice == 9:
                 genres = input('Enter genres (comma separated, e.g. "Hip-Hop, House"): ')
                 if genres: set_genre(audio, genres.split(', '))
