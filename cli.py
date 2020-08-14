@@ -260,11 +260,11 @@ def main():
                     else: print(url)
             else: print('No album covers found :(')
         elif main_choice == 5:
-            for file in tqdm(glob('*.mp3'), desc='Optimizing covers'):
+            for file in tqdm(glob('*.mp3'), desc='Fix covers/APIC encoding'):
                 with suppress(PermissionError, mutagen.MutagenError):
                     temp = MP3(file)
                     fix_cover(temp)
-                    optimize_cover(temp)
+                    # optimize_cover(temp)
             print('Optimized album covers for all tracks')
         elif main_choice == 6:
             for file in tqdm(glob('*.mp3'), desc='Optimizing covers'):

@@ -525,7 +525,16 @@ def fix_cover(audio: File):
         if k.startswith('APIC:') and k != 'APIC:':
             apic = audio.pop(k)
             apic.desc = ''
+            apic.encoding = 0
             audio['APIC:'] = apic
+            audio.save()
+            restart = True
+            break
+        elif k == 'APIC:' and audio[k].encoding != 0:
+            apic = audio.pop(k)
+            apic.desc = ''
+            apic.encoding = 0
+            audio[k] = apic
             audio.save()
             restart = True
             break
