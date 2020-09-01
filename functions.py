@@ -96,7 +96,11 @@ try:
     # this is for future when I get a Soundcloud api key
     # SOUNDCLOUD_CLIENT_ID = config['SOUNDCLOUD_CLIENT_ID']
     # SOUNDCLOUD_CLIENT_SECRET = config['SOUNDCLOUD_CLIENT_SECRET']
-except (FileNotFoundError, KeyError): print('config.json not found. Limited functionality')
+except (FileNotFoundError, KeyError):
+    SPOTIFY_AUTH_STR = f"{os.environ['SPOTIFY_CLIENT_ID']}:{os.environ['SPOTIFY_SECRET']}"
+    SPOTIFY_B64_AUTH_STR = base64.urlsafe_b64encode(SPOTIFY_AUTH_STR.encode()).decode()
+    LASTFM_API = os.getenv('LASTFM_API')
+    LASTFM_SECRET = os.getenv('LASTFM_SECRET')
 
 
 def set_title(audio: EasyID3, title: str):
