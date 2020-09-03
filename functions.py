@@ -66,7 +66,7 @@ def spotify_access_token_deco(f):
 
     def helper():
         nonlocal spotify_access_token, spotify_access_token_creation
-        if time.time() - spotify_access_token_creation > 21600:
+        if time.time() - spotify_access_token_creation > 21600:  # 6 hours
             spotify_access_token = f()
             spotify_access_token_creation = time.time()
         return spotify_access_token
