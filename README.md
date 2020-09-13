@@ -7,7 +7,7 @@ My own Music File editor made in python that can automatically set metadata and 
 - Trimming options
 - View album covers
 
-# NOTE
+# Note
 - If an album art was expected to be found but was not, email me
 
 # How to use
