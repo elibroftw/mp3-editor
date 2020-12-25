@@ -243,7 +243,9 @@ def main():
             files = []
             for _folder in music_folders:
                 files += glob(f'{_folder}/**/*.mp3', recursive=True)
-            for index, file in enumerate(files): print(f'{index + 1}. {file.replace("\\", "/")}')
+            for index, file in enumerate(files):
+                file = file.replace('\\', '/')
+                print(f'{index + 1}. {file}')
             print('Enter an integer to select the corresponding file')
             print('Entering anything else will take you back to the main menu')
             with suppress(ValueError, IndexError): individual_select(files[int(input()) - 1])
