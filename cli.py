@@ -187,6 +187,7 @@ def individual_select(filename):
                 print('    song length:', song_length)
                 print('    album cover:', has_album_cover(audio))
                 print('    bitrate:', get_bitrate(audio))
+                print('    metadata keys:', tuple(audio.keys()))
             elif sub_menu_user_choice == 13:
                 start = input('    Enter start time (seconds / MM:SS): ')
                 end = input('    Enter end time (seconds / MM:SS): ')
