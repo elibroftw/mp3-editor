@@ -479,7 +479,7 @@ def trim(filename, start, end):
         end = float(end)
     except ValueError: return False
     temp_path = get_temp_path(filename)
-    command = f'ffmpeg -i "{temp_path}" -ss {start} -t {end} -c copy "{filename}" -loglevel quiet'
+    command = f'ffmpeg -i "{temp_path}" -ss {start} -to {end} -c copy "{filename}" -loglevel quiet'
     ffmpeg_helper(filename, command)
     return True
 
