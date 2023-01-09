@@ -2,7 +2,7 @@
 A command line music file editor that can automatically set metadata and album cover given the filename. It can also remove silence or trim music files in length if ffmpeg is installed.
 - No longer maintained as the most important feature is the trimming and silence removal
 - For metadata editing and album art setting (all audio types), see [Music Caster](https://github.com/elibroftw/music-caster/)
-- If only metadata is required, you can use the [online version](http://elijahlopez.herokuapp.com/metadata-setter/)
+- If only metadata is required, you can use the [online version](http://elijahlopez.ca/metadata-setter/)
 
 # Features
 - Metadata setter (auto, manual)
